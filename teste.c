@@ -76,9 +76,9 @@ int main(void)
             if(ret >= 6){
               printf("%d\n%d.%d.%d.%d\n%d\n", number,elem1,elem2,elem3,elem4,porta);
 
-            ///OLHE AQUI SENHOR NISHIDA, DA FALHA DE SEGMENTACAO AQUI.
+            
              nos[node].no = number;
-             //nos[no].porta = porta;
+             nos[node].porta = porta;
 
              sprintf(nos[node].ip,"%d.%d.%d.%d",elem1,elem2,elem3,elem4);
             //printf("\nFRI:%s\n\n", fri);
@@ -109,14 +109,17 @@ int main(void)
 }
 
 
+//Testando funcoes
 
-
-  printf("IP:::::::::%s\n",nos[0].ip );
-  printf("IP:::::::::%s\n",nos[2].ip );
+  printf("%d: IP:::::::::%s,PORTA = %d\n",nos[0].no,nos[0].ip,nos[0].porta );
+  printf("%d: IP:::::::::%s,PORTA = %d\n",nos[1].no,nos[1].ip,nos[1].porta );
+  printf("%d: IP:::::::::%s,PORTA = %d\n",nos[2].no,nos[2].ip,nos[2].porta );
+  printf("%d: IP:::::::::%s,PORTA = %d\n",nos[3].no,nos[3].ip,nos[3].porta );
   fclose(arq);
 
-  
+  printf("\n");
   print_matriz(4,4);
+  printf("\n");
   print_mtu(4,4);
   printf("\n");
   
