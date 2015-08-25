@@ -48,12 +48,12 @@ struct NO nos[6];
 
 int iniciaEnlace(int no){
 
-    printf("Erro, nao foi possivel abrir o arquivo\n");
+   
     
 char url[]="arq.config",
        nome[20];
     
-    printf("Erro, nao foi possivel abrir o arquivo222\n");
+ 
 
   int node=0;     
   int number; 
@@ -65,24 +65,24 @@ char url[]="arq.config",
 
  
  
-  char *s;
+  char s[50];
   FILE *arq;
   
   int ret=6;
-printf("TESTE\n");
+
     
   arq = fopen(url, "r");
     
-    printf("VA PORRA\n");
+    
   if(arq == NULL)
       printf("Erro, nao foi possivel abrir o arquivo\n");
   else{
 
-        printf("VA PORRA22\n");
-      
-       // fscanf(arq,"%s",s);
-
         
+      
+       fscanf(arq,"%s",s);
+
+         printf("Erro, nao foi possivel abrir o arquivo\n");
           do{
              
               
