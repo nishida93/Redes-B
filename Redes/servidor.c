@@ -1,137 +1,84 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/types.h>
+#include <stdio.h>    /* for printf()*/ 
+#include <stdlib.h>   /* for exit(1);*/
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include <arpa/inet.h>
+#include <errno.h>              /* errno and error codes */
+#include <sys/time.h>           /* for gettimeofday() */
+#include <stdio.h>              /* for printf() */
+#include <unistd.h>             /* for fork() */
+#include <sys/types.h>          /* for wait() */
+#include <sys/wait.h>           /* for wait() */
+#include <signal.h>             /* for kill(), sigsuspend(), others */
+#include <sys/ipc.h>            /* for all IPC function calls */
+#include <sys/shm.h>            /* for shmget(), shmat(), shmctl() */
+#include <sys/sem.h>            /* for semget(), semop(), semctl() */
 #include <string.h>
+#include <sys/msg.h>    /* for msgget(), msgctl() */     
+#include <sys/types.h>    /* for wait(), msgget(), msgctl() */   
+#include <arpa/inet.h>
+#include <pthread.h>
+#include <netdb.h>
 
-   struct cadastro
+
+void error(char *msg){
+ perror(msg);
+    
+ exit(0);
+    
+}
+
+int main(int argc, char *argv[])
 {
-    char user[10];
-    char mens[50];
-    int op;    
-};
 
-/*
- * Servidor UDP
- */
-main(argc,argv)
+    int sock,length,fromlen, n;
+    struct sockaddr_in server;
+    struct sockaddr_in from;
+    
+    
+    char buf[1024];
+    
+    sock=socket(AF_INET, SOCK_DGRAM,0);
+    
+    if(sock < 0){
+        error("Opening socket");
+    }
 
-
-  int argc;
-  char **argv;
-  {
-  struct cadastro cad[5];
- 
-  int i=0;    
-  int sockint,s, namelen, client_address_size;
-  struct sockaddr_in client, server;
-
-  char erro[50];
-
-   /*
-    * Cria um socket UDP (dgram). 
-    */
-   if ((s = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
-   {
-       perror("socket()");
-       exit(1);
-   }
-
-   /*
-    * Define a qual endereço IP e porta o servidor estará ligado.
-    * Porta = 0 -> faz com que seja utilizada uma porta qualquer livre.
-    * IP = INADDDR_ANY -> faz com que o servidor se ligue em todos
-    * os endereços IP
-    */
-   server.sin_family      = AF_INET;   /* Tipo do endereço             */
-   server.sin_port        = atoi(argv[1]);         /* Escolhe uma porta disponível */
-   server.sin_addr.s_addr = INADDR_ANY;/* Endereço IP do servidor      */
-
-   server.sin_port = htons(server.sin_port);
-
- 
-
-   /*
-    * Liga o servidor à porta definida anteriormente.
-    */
-   if (bind(s, (struct sockaddr *)&server, sizeof(server)) < 0)
-   {
-       perror("bind()");
-       exit(1);
-   }
-
-   /* Consulta qual porta foi utilizada. */
-   namelen = sizeof(server);
-   if (getsockname(s, (struct sockaddr *) &server, &namelen) < 0)
-   {
-       perror("getsockname()");
-       exit(1);
-   }
-
-   /* Imprime qual porta foi utilizada. */
-   printf("Porta utilizada é %d\n", htons(server.sin_port));
-
-   /*
-    * Recebe uma mensagem do cliente.
-    * O endereço do cliente será armazenado em "client".
-    */
+    length = sizeof(server);
+    
+    bzero(&server, length);
+    
+    server.sin_family = AF_INET;
+    server.sin_addr.s_addr = INADDR_ANY;
+    server.sin_port = htons(atoi(argv[1]));
+    
+    if(bind(sock,(struct sockaddr *)&server,length) < 0){
+        error("binding");
+    }
+    
+    fromlen = sizeof(struct sockaddr_in);
+    
+    while(1){
+         printf("Recebe executando...e esperando");
+        n = recvfrom(sock,buf,1024,0,(struct sockaddr *)&from,&fromlen);
         
-   while(1==1)
-   {                  
-       client_address_size = sizeof(client);
-
-    if(recvfrom(s, &cad[i], sizeof(cad[i]), 0, (struct sockaddr *) &client, &client_address_size) <0)
-       {
-               perror("recvfrom()");
-               exit(1);
-       }
-
-    if(cad[i].op == 3)
-        exit(1);    
-
-    if(cad[i].op == 1)
-    {
-        if(i<5)
-        {    
-            i++;
-            strcpy(erro, "Mensagem cadastrada.");
+        if(n < 0){
+         error("recvfrom");   
         }
-        else
-            strcpy(erro, "Erro no cadastro.");
-
-        if (sendto(s, &erro, (sizeof(erro)), 0, (struct sockaddr *)&client, sizeof(client)) < 0)
-            {
-                  perror("sendto()");
-                  exit(2);
-            }
-    }
-
-    if(cad[i].op == 2)
-    {
-        int j;        
         
-        if (sendto(s, &i, sizeof(int), 0, (struct sockaddr *)&client, sizeof(client)) < 0)
-              {
-                      perror("sendto()");
-                      exit(2);
-              }
-
-        for(j=0; j<i; j++)        
-        {
-            if (sendto(s, &cad[j], sizeof(cad[j]), 0, (struct sockaddr *)&client, sizeof(client)) < 0)
-                  {
-                      perror("sendto()");
-                      exit(2);
-                  }
+        write(1,"Received a datagram: ",21);
+        
+        write(1, buf, n);
+        
+        n=sendto(sock,"Got your message\n",17,0,(struct sockaddr *)&from,fromlen);
+        
+        if(n < 0){
+            
+           error("sendTo"); 
         }
+        
+        
     }
-    }
-
-   /*
-    * Fecha o socket.
-    */
-
-   close(s);
+    
+    
+    
 }

@@ -1,152 +1,90 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/types.h>
+#include <stdio.h>    /* for printf()*/ 
+#include <stdlib.h>   /* for exit(1);*/
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <errno.h>              /* errno and error codes */
+#include <sys/time.h>           /* for gettimeofday() */
+#include <stdio.h>              /* for printf() */
+#include <unistd.h>             /* for fork() */
+#include <sys/types.h>          /* for wait() */
+#include <sys/wait.h>           /* for wait() */
+#include <signal.h>             /* for kill(), sigsuspend(), others */
+#include <sys/ipc.h>            /* for all IPC function calls */
+#include <sys/shm.h>            /* for shmget(), shmat(), shmctl() */
+#include <sys/sem.h>            /* for semget(), semop(), semctl() */
+#include <string.h>
+#include <sys/msg.h>    /* for msgget(), msgctl() */     
+#include <sys/types.h>    /* for wait(), msgget(), msgctl() */   
+#include <arpa/inet.h>
+#include <pthread.h>
+#include <netdb.h>
 
-   struct cadastro
-{
-    char user[10];
-    char mens[50];    
-    int op;
-};
 
-/*
- * Cliente UDP
- */
-main(argc, argv)
-int argc;
-char **argv;
-
-{
-   struct cadastro cad;        
-  
-   int opcao=1;    
-
-   char erro[50];
-       
-   int s;
-   unsigned short port;
-   int sockint, namelen, client_address_size, server_address_size;
-   struct sockaddr_in client, server;
-
-   server_address_size = sizeof(server);    
-
-   int i = 0;
-
-   /* 
-    * O primeiro argumento (argv[1]) é o endereço IP do servidor.
-    * O segundo argumento (argv[2]) é a porta do servidor.
-    */
-   if(argc != 3)
-   {
-      printf("Use: %s enderecoIP porta\n",argv[0]);
-      exit(1);
-   }
-  port = htons(atoi(argv[2]));
-
-   /*
-    * Cria um socket UDP (dgram).
-    */
-   if ((s = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
-   {
-       perror("socket()");
-       exit(1);
-   }
-
-   /* Define o endereço IP e a porta do servidor */
-   server.sin_family      = AF_INET;            /* Tipo do endereço         */
-   server.sin_port        = port;               /* Porta do servidor        */
-   server.sin_addr.s_addr = inet_addr(argv[1]); /* Endereço IP do servidor  */
-
-    int j=0;    
-
-    while(1==1)
-   {        
-       printf("Opcoes: \n");
-       printf("1 - Cadastrar mensagem \n");
-       printf("2 - Ler mensagens \n");
-       printf("3 - Sair da aplicacao \n");
-       scanf("%d",&opcao);
-   
-       switch(opcao)
-       {
-        case 1:
-        {
-                
-             printf("\nUsuario: ");
-                  __fpurge(stdin);
-                  fscanf(stdin, " %10[^\n]", cad.user);
-                  printf("Mensagem: ");
-                  __fpurge(stdin);
-              fscanf(stdin, " %50[^\n]", cad.mens);
-            printf("\n");
-            
-            cad.op=1;
-
-            if (sendto(s, &cad, sizeof(cad), 0, (struct sockaddr *)&server, sizeof(server)) < 0)
-                  {
-                      perror("sendto()");
-                      exit(2);
-                  }
-
-            if(recvfrom(s, &erro, sizeof(erro), 0, (struct sockaddr *) &server,
-                    &server_address_size) <0)
-               {
-                       perror("recvfrom()");
-                       exit(1);
-               }                
-
-            printf("%s\n", erro);
+void error(char *msg){
+ perror(msg);
     
-            break;        
-        }
-
-        case 2:
-        {
-            int z;
-            
-            cad.op = 2;
-
-                if (sendto(s, &cad, sizeof(cad), 0, (struct sockaddr *)&server, sizeof(server)) < 0)
-                  {
-                      perror("sendto()");
-                      exit(2);
-                  }
-
-            if(recvfrom(s, &z, sizeof(int), 0, (struct sockaddr *) &server,
-                    &server_address_size) <0)
-               {
-                       perror("recvfrom()");
-                       exit(1);
-               }                
-
-            printf("Quantidade de mensagens: %d\n", z);    
-            
-            for(i=0; i<z; i++)
-            {
-                if(recvfrom(s, &cad, sizeof(cad), 0, (struct sockaddr *) &server,
-                         (unsigned int *)&server_address_size) <0)
-                    {
-                          perror("recvfrom()");
-                          exit(1);
-                    }
-                
-
-                printf("Usuario: %s         ", cad.user);
-                printf("Mensagem: %s\n", cad.mens);
-            }
-            
-            break;
-        }
-
-        case 3:
-            exit(1);                        
-
-    }                
-   }
-   
-   /* Fecha o socket */
-   close(s);
+ exit(0);
+    
 }
+
+int main(int argc, char *argv[])
+{
+
+int sock,length, n;
+    struct sockaddr_in server;
+    struct sockaddr_in from;
+    struct hostent *hp;
+    
+    char buffer[256];
+    
+    sock = socket(AF_INET, SOCK_DGRAM,0);
+    
+    if(sock < 0){
+        error("socket");
+        
+    }
+    
+    server.sin_family = AF_INET;
+    hp = gethostbyname(argv[1]); //Localhost
+    
+    if(hp == 0){
+        error("Uknown host");
+        
+    }
+    
+    bcopy((char *)hp->h_addr, (char *)&server.sin_addr,hp->h_length);
+    
+    server.sin_port = htons(atoi(argv[2])); //5000
+    length=sizeof(struct sockaddr_in);
+    
+    printf("Please enter a message: ");
+    
+    bzero(buffer, 256);
+    fgets(buffer,255,stdin);
+    
+    scanf("%d",&teste);
+    
+    strcpy(buffer,"EAI");
+    
+    n=sendto(sock,buffer,strlen(buffer),0,&server,length);
+    
+    if(n < 0 ){
+        error("Sendto");
+    }
+    
+    n=recvfrom(sock,buffer,256,0,&from,&length);
+
+    if(n < 0){
+        error("recvfrom");
+    }
+    
+    write(1,"Got an ack: ",12);
+    write(1,buffer,n);
+    
+    
+    
+    
+}
+
+
+

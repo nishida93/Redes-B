@@ -27,13 +27,33 @@
 
 //Chama a funcao do enlace: enviaEnlace()
 
-int iniciaTeste(int no){
+int iniciaTeste(){
 
 	//Troca de mensagens ou fila, serve para simular a camada de rede.
 	
-    printf("No do Teste : %d\n\n", no);
+    int no=10;
+    char *datagrama;
     
-    //iniciaEnlace(4);
+    
+    
+    fflush(stdout);
+    printf("Deseja enviar para qual nó?\n");
+    scanf("%d", &no); 
+    
+    printf("Escreva uma mensagem para enviar:\n");
+  
+    fflush(stdout);
+    const int bufsize = 4096; /* Or a #define or whatever */
+    char buffer[bufsize];
+    fflush(stdout);
+    //fgets(buffer, bufsize, stdin);
+    
+    scanf("%s",buffer);
+    printf("%s\n\n",buffer);
+    
+    //Chama envia enlace;
+    enviaEnlace(no,buffer, 3);
+    
 
 	return 0;
 
