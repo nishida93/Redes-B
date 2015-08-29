@@ -484,7 +484,7 @@ void print_mtu(int lin, int col){
 
 int tem_ligacao(int no1,int no2){
 
-    if(matriz[no1][no2])
+    if(matriz[no1-1][no2-1])
       return 1;
     return 0;
 
