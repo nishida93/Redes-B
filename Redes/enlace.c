@@ -29,11 +29,6 @@ struct NO nos[6];
  
 
 
-
-
-
-
-
 struct threadsParam{
     int no;
     char data[1024];
@@ -360,14 +355,6 @@ int recebeEnlace(){
     return 0;   
 }
 
-
-   
- 
-
-
-
-
-    
 
 
 
