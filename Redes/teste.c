@@ -87,16 +87,16 @@ void *Prod_teste()
     printf("Data::: %s\n\n",data_env.buffer);
     
     data_env.tam_buffer = strlen(data_env.buffer);
-    data_env.no = no;
+    data_env.no_envio = no;
     
     //Chama envia enlace;
-    enviaEnlace(data_env.no,data_env.buffer, data_env.tam_buffer);
+    enviaEnlace(data_env.no_envio,data_env.buffer, data_env.tam_buffer);
     
 }
 
 void *Cons_teste()
 {
-    printf("Escreva uma mensagem para enviar:\n");
+    /*printf("Escreva uma mensagem para enviar:\n");
     
     //pthread_mutex_lock(&rcv1);
     char buffer[40];
@@ -104,7 +104,25 @@ void *Cons_teste()
     printf("Mensagem Recebida: %s",buffer);
     
     //pthread_mutex_unlock(&rcv1); 
+*/
+     while (1) {
+
+        //Trava mutex de sincronismo
+        pthread_mutex_lock(&rcv2);
+
         
+
+        if (data_rcv.tam_buffer != 0) {
+
+        printf("Teste_enlace.c (Receber) = > Type: '%d', Tam_buffer: '%d' Bytes, Buffer: '%s'\n", data_rcv.type, data_rcv.tam_buffer,
+                data_rcv.buffer);
+
+        data_rcv.erro = -1;
+
+        }
+       
+        pthread_mutex_unlock(&rcv1);
+    }
         
         
 }

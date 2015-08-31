@@ -5,7 +5,7 @@
 #gcc projeto.o teste.o enlace.o -o projeto.exe
 
 all: frag gera
-	./projeto.exe
+	
 
 frag:
 	gcc -c teste.c -o teste.o

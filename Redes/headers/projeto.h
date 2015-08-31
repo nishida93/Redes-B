@@ -32,14 +32,14 @@
 struct NO{
     int no;
     int porta;
-    char ip[6];
+    char ip[100];
 };
 
 
 struct datagrama {
     int type;
     int tam_buffer;
-    int no;
+    int  no_envio;
     char buffer[100];
     int erro;
 };

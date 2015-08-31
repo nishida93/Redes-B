@@ -32,7 +32,7 @@
 struct datagrama {
     int type;
     int tam_buffer;
-    int no;
+    int  no_envio;
     char buffer[100];
     int erro;
 };
@@ -43,7 +43,7 @@ struct datagrama {
 struct NO{
     int no;
     int porta;
-    char ip[6];
+    char ip[100];
     
 };
 

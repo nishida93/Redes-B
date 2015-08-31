@@ -71,22 +71,29 @@ int iniciaEnlace(int no, char *argv){
       
        fscanf(arq,"%s",str);
 
-    
+    char aux[10]="";
           do{
              
               
             ret = fscanf(arq,"%d: IP = %d.%d.%d.%d, Porta = %d;", &number,&elem1,&elem2,&elem3,&elem4,&porta);
             
             if(ret >= 6){
-              printf("%d\n%d.%d.%d.%d\n%d\n", number,elem1,elem2,elem3,elem4,porta);
-
+                
+            if(node != 4){    
+              
             
              nos[node].no = number;
              nos[node].porta = porta;
-
+            fflush(stdout);
+                 fflush(stdin);
              sprintf(nos[node].ip,"%d.%d.%d.%d",elem1,elem2,elem3,elem4);
-            //printf("\nFRI:%s\n\n", fri);
+               fflush(stdin);
+                 fflush(stdout);
+                
+            //printf("\nFRI:%s\n\n", nos[3].ip);
+                //strcpy(nos[node].ip,nos[node].ip);
              node++;
+            }
           }
           }while(ret >= 6);
 
@@ -115,7 +122,7 @@ int iniciaEnlace(int no, char *argv){
 
 //Testando funcoes
 
-  /*printf("%d: IP:::::::::%s,PORTA = %d\n",nos[0].no,nos[0].ip,nos[0].porta );
+  printf("%d: IP:::::::::%s,PORTA = %d\n",nos[0].no,nos[0].ip,nos[0].porta );
   printf("%d: IP:::::::::%s,PORTA = %d\n",nos[1].no,nos[1].ip,nos[1].porta );
   printf("%d: IP:::::::::%s,PORTA = %d\n",nos[2].no,nos[2].ip,nos[2].porta );
   printf("%d: IP:::::::::%s,PORTA = %d\n",nos[3].no,nos[3].ip,nos[3].porta );
@@ -132,10 +139,10 @@ int iniciaEnlace(int no, char *argv){
   printf("\nMTU:%d\n\n", getMtu(1,2));
 
 ////UDP
+    printf("\nFRI:%s\n\n", nos[2].ip);
     
     
-    
-  */
+  
     
   recebeEnlace();
   return 0;
@@ -178,8 +185,10 @@ void *Prod_enlace(void *thread)
     bzero(&server, length);
     
     server.sin_family = AF_INET;
-    server.sin_addr.s_addr = INADDR_ANY;
-    server.sin_port = htons(atoi("5000"));
+    
+    
+    server.sin_addr.s_addr = inet_addr(nos[no_do_enlace-1].ip);
+    server.sin_port = htons(nos[no_do_enlace-1].porta);
     
     if(bind(sock,(struct sockaddr *)&server,length) < 0){
         error("binding");
@@ -190,7 +199,28 @@ void *Prod_enlace(void *thread)
     while(1){
         
          pthread_mutex_lock(&rcv1);
+         
          printf("\nRecebe executando...e esperando\n");
+         printf("\nFRI:%s\n\n", nos[1].ip);
+        printf("RECEBE:::::IP:::::%s PORTA::::%d",nos[no_do_enlace-1].ip,nos[no_do_enlace-1].porta);
+        
+        /*
+        
+
+    while (TRUE) {
+
+        struct frame frame_rcv;
+        int sum = 0;
+
+        from_address_size = sizeof (from);
+        if (recvfrom(s, &frame_rcv, sizeof (frame_rcv), 0, (struct sockaddr *) &from, &from_address_size) < 0) {
+            perror("recvfrom()");
+            exit(1);
+        }
+        
+        */
+        
+        
         n = recvfrom(sock,buf,1024,0,(struct sockaddr *)&from,&fromlen);
         
         if(n < 0){
@@ -218,7 +248,9 @@ void *Prod_enlace(void *thread)
         
     }
     
-    //FUNCAO PARA CHAMAR RECEBE DO TESTE ou loop infinito
+    
+    pthread_mutex_unlock(&rcv2);
+    //FUNCAO PARA CHAMAR RECEBE DO TESTE ou loop infinito??
     
    
    
@@ -243,7 +275,7 @@ void *Cons_enlace(void *thread){
     
     char buffer[256];
     
-    pthread_mutex_lock(&mutex_env2);
+    pthread_mutex_lock(&env2);
     
     sock = socket(AF_INET, SOCK_DGRAM,0);
     
@@ -251,7 +283,7 @@ void *Cons_enlace(void *thread){
     
         
         mtu = getMtu(no_do_enlace,readParams->no);
-        
+        printf("ENVIA::::IP:::::%s PORTA::::%d",nos[readParams->no-1].ip,nos[readParams->no-1].porta);
         printf("Mtu:::%d\n\n",mtu);
         
     if(sock < 0){
@@ -262,14 +294,15 @@ void *Cons_enlace(void *thread){
         
         
     server.sin_family = AF_INET;
-    hp = gethostbyname("localhost"); //Localhost
+    hp = gethostbyname(nos[readParams->no-1].ip); //Localhost
     
     if(hp == 0){
         error("Uknown host");
         
     }
+        
     bcopy((char *)hp->h_addr, (char *)&server.sin_addr,hp->h_length);
-    server.sin_port = htons(atoi("5000")); //5000
+    server.sin_port = htons(nos[readParams->no-1].porta); //5000
     length=sizeof(struct sockaddr_in);
     
     //TESTA MTU
