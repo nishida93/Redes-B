@@ -1,25 +1,16 @@
-#include <stdio.h>    /* for printf()*/ 
-#include <stdlib.h>   /* for exit(1);*/
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <errno.h>              /* errno and error codes */
-#include <sys/time.h>           /* for gettimeofday() */
-#include <stdio.h>              /* for printf() */
-#include <unistd.h>             /* for fork() */
-#include <sys/types.h>          /* for wait() */
-#include <sys/wait.h>           /* for wait() */
-#include <signal.h>             /* for kill(), sigsuspend(), others */
-#include <sys/ipc.h>            /* for all IPC function calls */
-#include <sys/shm.h>            /* for shmget(), shmat(), shmctl() */
-#include <sys/sem.h>            /* for semget(), semop(), semctl() */
-#include <string.h>
-#include <sys/msg.h>    /* for msgget(), msgctl() */     
-#include <sys/types.h>    /* for wait(), msgget(), msgctl() */   
 
+
+
+#include "headers/teste.h"
 
 /*
  * Cliente UDP
  */
+
+//Buffers
+
+char buffer_teste[40];
+
 
 
 
@@ -31,9 +22,53 @@ int iniciaTeste(){
 
 	//Troca de mensagens ou fila, serve para simular a camada de rede.
 	
+    int te, tr;
+    pthread_t te_teste, tr_teste;
+
+    
+    
+   
+
+    te = pthread_create(&te_teste, NULL, Prod_teste, NULL);
+
+    if (te) {
+        printf("ERRO: impossivel criar a thread");
+        exit(-1);
+    }
+
+    
+    tr = pthread_create(&tr_teste, NULL,Cons_teste, NULL);
+
+    if (tr) {
+        printf("ERRO: impossivel criar a thread : receberDatagramas\n");
+        exit(-1);
+    }
+
+    
+    //Aguarda o termino das threads
+    pthread_join(te_teste, NULL);
+    pthread_join(tr_teste, NULL);
+    
+    
+    
+    
+
+	return 0;
+
+}
+
+///Produtor e Consumidor
+
+void *Prod_teste()
+{    
+    
+    
+    
+    
     int no=10;
     char *datagrama;
-    
+    //Mutex
+    pthread_mutex_lock(&env1);
     
     
     fflush(stdout);
@@ -43,20 +78,46 @@ int iniciaTeste(){
     printf("Escreva uma mensagem para enviar:\n");
   
     fflush(stdout);
-    const int bufsize = 4096; /* Or a #define or whatever */
-    char buffer[bufsize];
-    fflush(stdout);
+    //const int bufsize = 4096; 
+    //char buffer[bufsize];
+
     //fgets(buffer, bufsize, stdin);
     
-    scanf("%s",buffer);
-    printf("%s\n\n",buffer);
+    scanf("%s",data_env.buffer);
+    printf("Data::: %s\n\n",data_env.buffer);
+    
+    data_env.tam_buffer = strlen(data_env.buffer);
+    data_env.no = no;
     
     //Chama envia enlace;
-    enviaEnlace(no,buffer, 3);
+    enviaEnlace(data_env.no,data_env.buffer, data_env.tam_buffer);
     
-
-	return 0;
-
 }
+
+void *Cons_teste()
+{
+    printf("Escreva uma mensagem para enviar:\n");
+    
+    //pthread_mutex_lock(&rcv1);
+    char buffer[40];
+    strcpy(buffer,data_rcv.buffer);
+    printf("Mensagem Recebida: %s",buffer);
+    
+    //pthread_mutex_unlock(&rcv1); 
+        
+        
+        
+}
+
+
+
+
+
+
+
+
+
+
+
 
 

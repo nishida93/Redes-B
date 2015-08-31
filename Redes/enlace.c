@@ -1,23 +1,7 @@
-#include <stdio.h>    /* for printf()*/ 
-#include <stdlib.h>   /* for exit(1);*/
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <errno.h>              /* errno and error codes */
-#include <sys/time.h>           /* for gettimeofday() */
-#include <stdio.h>              /* for printf() */
-#include <unistd.h>             /* for fork() */
-#include <sys/types.h>          /* for wait() */
-#include <sys/wait.h>           /* for wait() */
-#include <signal.h>             /* for kill(), sigsuspend(), others */
-#include <sys/ipc.h>            /* for all IPC function calls */
-#include <sys/shm.h>            /* for shmget(), shmat(), shmctl() */
-#include <sys/sem.h>            /* for semget(), semop(), semctl() */
-#include <string.h>
-#include <sys/msg.h>    /* for msgget(), msgctl() */     
-#include <sys/types.h>    /* for wait(), msgget(), msgctl() */   
-#include <arpa/inet.h>
-#include <pthread.h>
-#include <netdb.h>
+
+
+
+#include "headers/enlace.h"
 
 ////Constantes
 
@@ -34,30 +18,6 @@ int matriz[10][10];
 //mtu --  Matriz adjacente armazena os MTU dos enlaces.
 int mtu[10][10];
 
-//Funçao teste que printa a matriz
-void print_matriz(int,int);
-
-//Funçao teste que printa a matriz mtu
-void print_mtu(int,int);
-
-//Funcoes Importantes
-
-
-//retorna 1 caso haja ligacao, 0 caso nao.
-int tem_ligacao(int, int);
-
-//retorna o MTU, passando dois nos como parametro, caso nao haja ligacao entre os nós, retorna 0.
-int getMtu(int,int);
-
-//Struc No -- Armazena as informações dos nos
-
-struct NO{
-
-    int no;
-    int porta;
-    char ip[6];
-    
-};
 
 
 
@@ -66,11 +26,13 @@ struct NO nos[6];
 //nos[0] guarda as informacoes do no 1.
 //nos[1] guarda as informacoes do no 2.
 //etc..
+ 
 
-//Threads
 
-void *envia(void *);
-void *recebe(void *);
+
+
+
+
 
 struct threadsParam{
     int no;
@@ -78,14 +40,12 @@ struct threadsParam{
     
 };
 
-int recebeEnlace();
+
 
 int no_do_enlace; // Numero do nó iniciado;
 
 int iniciaEnlace(int no, char *argv){
 
-   
-  
   no_do_enlace = no;
  
 
@@ -151,7 +111,7 @@ int iniciaEnlace(int no, char *argv){
           }while(ret >= 3);
 
         
-        printf("\n");
+        printf("PASSOU\n");
   
 
         
@@ -182,12 +142,12 @@ int iniciaEnlace(int no, char *argv){
     
   */
     
-    recebeEnlace();
+  recebeEnlace();
   return 0;
 }
 
 
-//Threads  -------------
+//Threads Produtor e Consumido  -------------
 
 void error(char *msg){
  perror(msg);
@@ -197,81 +157,9 @@ void error(char *msg){
 }
 
 int v[10];
-void *envia(void *thread){
-  struct threadsParam *readParams = thread;
- // char *dado = datagram;  
 
-    
-    int teste;
-    printf("\nEnvia executando...\n");
-    printf("\n%d ::: %s\n",readParams->no, readParams->data);
-    int sock,length, n;
-    struct sockaddr_in server;
-    struct sockaddr_in from;
-    struct hostent *hp;
-    
-    char buffer[256];
-    
-    sock = socket(AF_INET, SOCK_DGRAM,0);
-    
-    if(sock < 0){
-        error("socket");
-        
-    }
-    
-    server.sin_family = AF_INET;
-    hp = gethostbyname("localhost"); //Localhost
-    
-    if(hp == 0){
-        error("Uknown host");
-        
-    }
-    
-    bcopy((char *)hp->h_addr, (char *)&server.sin_addr,hp->h_length);
-    
-    server.sin_port = htons(atoi("5000")); //5000
-    length=sizeof(struct sockaddr_in);
-    
-    
-    
-    bzero(buffer, 256);
-    fgets(buffer,255,stdin);
-    
-    //scanf("%d",&teste);
-    
-    strcpy(buffer,readParams->data);
-    
-    
-    
-    if(tem_ligacao(no_do_enlace,readParams->no)){
-    n=sendto(sock,buffer,strlen(buffer),0,&server,length);
-    
-    if(n < 0 ){
-        error("Sendto");
-    }
-    //RECEBE GOT YOUR MESSAGE
-    n=recvfrom(sock,buffer,256,0,&from,&length);
-
-    if(n < 0){
-        error("recvfrom");
-    }
-    
-        write(1,"\nGot an ack: ",14);
-        write(1,buffer,n);
-    }
-    else{
-        
-        fprintf(stdout,"\nNós não são vizinhos\n");
-        
-    }
-    
-    
-    
-}
-
-
-
-void *recebe(void *thread)
+//Recebe Datagrama
+void *Prod_enlace(void *thread)
 {
   int id=*(int *)thread;
     
@@ -281,6 +169,8 @@ void *recebe(void *thread)
     
     
     char buf[1024];
+    
+   
     
     sock=socket(AF_INET, SOCK_DGRAM,0);
     
@@ -303,7 +193,9 @@ void *recebe(void *thread)
     fromlen = sizeof(struct sockaddr_in);
     
     while(1){
-         //printf("\nRecebe executando...e esperando\n");
+        
+         pthread_mutex_lock(&rcv1);
+         printf("\nRecebe executando...e esperando\n");
         n = recvfrom(sock,buf,1024,0,(struct sockaddr *)&from,&fromlen);
         
         if(n < 0){
@@ -313,6 +205,13 @@ void *recebe(void *thread)
         write(1,"Received a datagram: ",21);
         
         write(1, buf, n);
+        
+        
+        strcpy(data_rcv.buffer,buf);///<---------------------------
+        data_rcv.tam_buffer = strlen(buf);
+        
+        
+        //RECALCULA CHECKSUM
         
         n=sendto(sock,"Got your message\n",17,0,(struct sockaddr *)&from,fromlen);
         
@@ -324,10 +223,103 @@ void *recebe(void *thread)
         
     }
     
+    //FUNCAO PARA CHAMAR RECEBE DO TESTE ou loop infinito
+    
    
    
 }
 
+//Envia Datagrama
+void *Cons_enlace(void *thread){
+  struct threadsParam *readParams = thread;
+ // char *dado = datagram;  
+
+    
+    int teste;
+    printf("\nEnvia executando...\n");
+    printf("\n%d ::: %s\n",readParams->no, readParams->data);
+    int sock,length, n;
+    struct sockaddr_in server;
+    struct sockaddr_in from;
+    struct hostent *hp;
+    
+    int mtu=0;
+    
+    
+    char buffer[256];
+    
+    pthread_mutex_lock(&mutex_env2);
+    
+    sock = socket(AF_INET, SOCK_DGRAM,0);
+    
+    if(tem_ligacao(no_do_enlace,readParams->no)){
+    
+        
+        mtu = getMtu(no_do_enlace,readParams->no);
+        
+        printf("Mtu:::%d\n\n",mtu);
+        
+    if(sock < 0){
+        error("socket");
+        
+    }
+    
+        
+        
+    server.sin_family = AF_INET;
+    hp = gethostbyname("localhost"); //Localhost
+    
+    if(hp == 0){
+        error("Uknown host");
+        
+    }
+    bcopy((char *)hp->h_addr, (char *)&server.sin_addr,hp->h_length);
+    server.sin_port = htons(atoi("5000")); //5000
+    length=sizeof(struct sockaddr_in);
+    
+    //TESTA MTU
+    
+    bzero(buffer, 256);
+    fgets(buffer,255,stdin);
+    
+    //scanf("%d",&teste);
+    
+    strcpy(buffer,readParams->data);
+    
+    
+    
+    //CHECKSUM
+        
+        
+    n=sendto(sock,buffer,strlen(buffer),0,&server,length);
+    
+    if(n < 0 ){
+        error("Sendto");
+    }
+    //RECEBE GOT YOUR MESSAGE
+    n=recvfrom(sock,buffer,256,0,&from,&length);
+
+    if(n < 0){
+        error("recvfrom");
+    }
+    
+        write(1,"\nGot an ack: ",14);
+        write(1,buffer,n);
+    }
+    else{
+        
+        fprintf(stdout,"\nNós não são vizinhos\n");
+        
+    }
+    
+    pthread_mutex_unlock(&env1);
+    
+}
+
+
+
+
+//Cria a thread Cons_Enlace
 int enviaEnlace(int no, char datagrama[], int tamanho){
 
 
@@ -342,7 +334,7 @@ int enviaEnlace(int no, char datagrama[], int tamanho){
     strcpy(readParams.data,datagrama);
     
     
-    pthread_create(&t1, NULL, envia, (void *)(&readParams));
+    pthread_create(&t1, NULL, Cons_enlace, (void *)(&readParams));
     pthread_join(t1, NULL);
     //printf("No : %d Datagrama : %s Tamanho : %d\n\n", no, datagrama, tamanho);
     
@@ -351,6 +343,8 @@ int enviaEnlace(int no, char datagrama[], int tamanho){
 	return 0;
 }
 
+
+//Cria a thread Prod_Enlace
 int recebeEnlace(){
     
     //dispara thread recv
@@ -358,42 +352,15 @@ int recebeEnlace(){
     pthread_t t2;
     
     int a2 = 2;
+    printf("recebe\n\n");
     
-    
-    pthread_create(&t2, NULL, recebe, (void *)(&a2));
+    pthread_create(&t2, NULL, Prod_enlace, (void *)(&a2));
     
     //pthread_join(t2, NULL);
     return 0;   
 }
 
 
-  /*int idC;
-  printf("Barbeiro #%d iniciou...\n", id);
-  usleep(1000);
-  
-  while (1 == 1) {
-      
-        // down(&customers);
-	
-	
-        
-	idC=clienteID;
-	
-	//down(&exc_aces);
-	pthread_mutex_lock(&exc_aces); 
-
-	waiting=waiting-1;
-	
-	//up(&exc_aces);
-	pthread_mutex_unlock(&exc_aces); 
-	
-	cut_hair(id,idC);
-	//up(barbers);
-	
-	
-	
-  }*/
-  
    
  
 
@@ -401,50 +368,6 @@ int recebeEnlace(){
 
 
     
- /* printf("Cliente #%d iniciou...\n", id);
-  usleep(1000);
-  
-        //down(&exc_aces);	
-	pthread_mutex_lock(&exc_aces); 
-		       
-        if( waiting < NUM_CHAIRS)
-	{
-		gettimeofday(&start_time[id], NULL );	  
-			
-		waiting=waiting+1;
-		       
-		clienteID=id;
-		       
-		
-		//up(&custumers);
-		pthread_mutex_unlock(&exc_aces); 
-		//up(&exc_aces);
-		
-		//down(&barbers);
-		       
-		pthread_mutex_lock(&apreciate); 
-		//apreciate_hair(id);
-		pthread_mutex_unlock(&apreciate);
-			
-        }
-        else{
-		 //up(&exc_aces);
-		pthread_mutex_unlock(&exc_aces); 
-		
-		fflush(stdout);
-		fprintf(stdout,"\nCliente %d não foi atendido.\n\n",id);
-		fflush(stdout);
-		pthread_exit(NULL);
-                         
-	}
-  
-  //sleep(15);
- // printf("Terminando cliente:%d\n",id);
-
-  pthread_exit(NULL);*/
-
-
-
 
 
 
@@ -494,7 +417,7 @@ int getMtu(int no1, int no2){
 
     if(!tem_ligacao(no1,no2))
       return 0;
-    return mtu[no1][no2];
+    return mtu[no1-1][no2-1];
 
 }
 
