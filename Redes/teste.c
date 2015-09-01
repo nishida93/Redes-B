@@ -59,6 +59,8 @@ int iniciaTeste(){
 
 ///Produtor e Consumidor
 
+
+//Envia Datagrama
 void *Prod_teste()
 {    
     
@@ -91,9 +93,11 @@ void *Prod_teste()
     
     //Chama envia enlace;
     enviaEnlace(data_env.no_envio,data_env.buffer, data_env.tam_buffer);
-    
+    pthread_mutex_lock(&env2);
 }
 
+
+//Recebe Datagrama
 void *Cons_teste()
 {
     /*printf("Escreva uma mensagem para enviar:\n");
@@ -110,7 +114,8 @@ void *Cons_teste()
         //Trava mutex de sincronismo
         pthread_mutex_lock(&rcv2);
 
-        
+        printf("Teste_enlace.c (Receber) = > Type: '%d', Tam_buffer: '%d' Bytes, Buffer: '%s'\n", data_rcv.type, data_rcv.tam_buffer,
+                data_rcv.buffer);
 
         if (data_rcv.tam_buffer != 0) {
 

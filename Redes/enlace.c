@@ -238,12 +238,14 @@ void *Prod_enlace(void *thread)
         
         //RECALCULA CHECKSUM
         
-        n=sendto(sock,"Got your message\n",17,0,(struct sockaddr *)&from,fromlen);
+        
+        //Mensagem Confirmando Recebimento
+        /*n=sendto(sock,"Got your message\n",17,0,(struct sockaddr *)&from,fromlen);
         
         if(n < 0){
             
            error("sendTo"); 
-        }
+        }*/
         
         
     }
@@ -325,14 +327,14 @@ void *Cons_enlace(void *thread){
         error("Sendto");
     }
     //RECEBE GOT YOUR MESSAGE
-    n=recvfrom(sock,buffer,256,0,&from,&length);
+    /*n=recvfrom(sock,buffer,256,0,&from,&length);
 
     if(n < 0){
         error("recvfrom");
     }
     
         write(1,"\nGot an ack: ",14);
-        write(1,buffer,n);
+        write(1,buffer,n);*/
     }
     else{
         
@@ -396,10 +398,11 @@ int recebeEnlace(){
 
 void print_matriz(int lin, int col){
 
-
-    for(int x=0;x<lin;x++)
+     int x,y;
+    
+    for(x=0;x<lin;x++)
     {
-        for(int y=0;y<col;y++)
+        for(y=0;y<col;y++)
         {
             printf("%d ", matriz[x][y]);
         }
@@ -411,11 +414,11 @@ void print_matriz(int lin, int col){
 }
 
 void print_mtu(int lin, int col){
+    int x,y;
 
-
-  for(int x=0;x<lin;x++)
+  for(x=0;x<lin;x++)
     {
-        for(int y=0;y<col;y++)
+        for(y=0;y<col;y++)
         {
             printf("%d ", mtu[x][y]);
         }
