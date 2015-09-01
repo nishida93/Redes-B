@@ -164,7 +164,7 @@ void *Prod_enlace(void *thread)
     struct sockaddr_in server;
     struct sockaddr_in from;
     
-    
+    printf("Thread \n");
     char buf[1024];
     
    
@@ -198,7 +198,7 @@ void *Prod_enlace(void *thread)
          fromlen = sizeof(struct sockaddr_in);
          
         
-        
+        printf("Receive iniciada\n");
         n = recvfrom(sock,buf,1024,0,(struct sockaddr *)&from,&fromlen);
         
         if(n < 0){
@@ -362,14 +362,21 @@ int iniciaThreads(){
     int a1 = 1;
 
     
-    pthread_create(&t1, NULL, Cons_enlace, (void *)(&a1));
+    
+    //Recebe
+    
+    printf("Thread Receive iniciada\n");
+    pthread_create(&t1, NULL, Prod_enlace, (void *)(&a1));
     
     pthread_t t2;
     
     int a2 = 2;
+    //Envia
+    pthread_create(&t2, NULL, Cons_enlace, (void *)(&a2));
+    
+    
 
     
-    pthread_create(&t2, NULL, Prod_enlace, (void *)(&a2));
     
     pthread_join(t1, NULL);
     pthread_join(t2, NULL);
