@@ -122,7 +122,7 @@ void *Cons_teste()
 
         if (data_rcv.tam_buffer != 0) {
 
-        printf("Teste-> Tam_buffer: %d Bytes, Buffer: %s\n", data_rcv.tam_buffer, data_rcv.buffer);
+        printf("\n\nTeste-> Tam_buffer: %d Bytes, Buffer: %s\n", data_rcv.tam_buffer, data_rcv.buffer);
 
         pthread_mutex_unlock(&rcv1);
 

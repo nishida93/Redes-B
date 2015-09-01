@@ -316,12 +316,16 @@ void *Cons_enlace(void *thread){
     
     //scanf("%d",&teste);
     //Passando para a struct
+    strcpy(buffer,readParams->data);    
     strcpy(data_env.buffer,readParams->data);
     data_env.tam_buffer = readParams->tam;
     data_env.no_envio = readParams->no;
     
     
     //CHECKSUM
+        
+        
+        
     
         
     //Garbler
