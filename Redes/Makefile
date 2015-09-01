@@ -13,4 +13,4 @@ frag:
 	gcc -c projeto.c -o projeto.o
 
 gera:
-	gcc projeto.o teste.o enlace.o -o projeto.exe
+	gcc projeto.o teste.o enlace.o -o projeto.exe -lpthread
