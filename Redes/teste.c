@@ -48,7 +48,7 @@ int iniciaTeste(){
     //Aguarda o termino das threads
     
     pthread_join(te_teste, NULL);
-    printf("Nao pode ser2222");
+    
     pthread_join(tr_teste, NULL);
     
     

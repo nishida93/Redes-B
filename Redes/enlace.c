@@ -164,7 +164,7 @@ void *Prod_enlace(void *thread)
     struct sockaddr_in server;
     struct sockaddr_in from;
     
-    printf("Thread \n");
+ 
     char buf[1024];
     
    
@@ -198,7 +198,7 @@ void *Prod_enlace(void *thread)
          fromlen = sizeof(struct sockaddr_in);
          
         
-        printf("Receive iniciada\n");
+        
         n = recvfrom(sock,buf,1024,0,(struct sockaddr *)&from,&fromlen);
         
         if(n < 0){
@@ -218,7 +218,7 @@ void *Prod_enlace(void *thread)
         
         int check = CheckSum(&data_rcv);;
 
-       
+       printf("check2::: %d\n\n",check);
 
             //RECALCULA CHECKSUM
         if (checksum == check){
@@ -255,7 +255,7 @@ void *Cons_enlace(void *thread){
     
     //printf("\n%d ::: %s\n",data_env->no, data_env->data);
     while(1){
-    printf("\nEnvia executando...\n");
+    
     int sock,length, n;
     struct sockaddr_in server;
     struct sockaddr_in from;
@@ -277,8 +277,8 @@ void *Cons_enlace(void *thread){
         
         mtu = getMtu(no_do_enlace,data_env.no_envio);
         
-        printf("ENVIA::::IP:::::%s PORTA::::%d",nos[data_env.no_envio-1].ip,nos[data_env.no_envio-1].porta);
-        printf("Mtu:::%d\n\n",mtu);
+        //printf("ENVIA::::IP:::::%s PORTA::::%d",nos[data_env.no_envio-1].ip,nos[data_env.no_envio-1].porta);
+        //printf("Mtu:::%d\n\n",mtu);
         
     if(sock < 0){
         error("socket");
@@ -294,7 +294,8 @@ void *Cons_enlace(void *thread){
         error("Uknown host");
         
     }
-        
+       
+     
     bcopy((char *)hp->h_addr, (char *)&server.sin_addr,hp->h_length);
     server.sin_port = htons(nos[data_env.no_envio-1].porta); //5000
     length=sizeof(struct sockaddr_in);
@@ -309,7 +310,7 @@ void *Cons_enlace(void *thread){
     
     
     
-    if(sizeof(buffer) > mtu){
+    if(strlen(buffer) > mtu){
         error("MTU Error-> Nao foi possivel enviar o pacote");
         
         
@@ -365,7 +366,7 @@ int iniciaThreads(){
     
     //Recebe
     
-    printf("Thread Receive iniciada\n");
+    
     pthread_create(&t1, NULL, Prod_enlace, (void *)(&a1));
     
     pthread_t t2;

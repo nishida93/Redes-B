@@ -65,6 +65,16 @@ int main(int argc, char *argv[])
     data_rcv.no_envio = 0;
     
     
+    
+    te = pthread_create(&te_iniciaEnlace, NULL, iniciaEnlace, NULL);
+
+    if (te) {
+        printf("error: impossivel criar a thread do enlace\n");
+        exit(-1);
+    }
+    
+    sleep(1);
+    
     tt = pthread_create(&tt_iniciaTeste, NULL, iniciaTeste , NULL);
 
     if (tt) {
@@ -73,12 +83,7 @@ int main(int argc, char *argv[])
     }
     
     
-    te = pthread_create(&te_iniciaEnlace, NULL, iniciaEnlace, NULL);
-
-    if (te) {
-        printf("error: impossivel criar a thread do enlace\n");
-        exit(-1);
-    }
+    
 
   
 
