@@ -222,7 +222,7 @@ void *Prod_enlace(void *thread)
         */
         
         
-        n = recvfrom(sock,&data_rcv,1024,0,(struct sockaddr *)&from,&fromlen);
+        n = recvfrom(sock,buf,1024,0,(struct sockaddr *)&from,&fromlen);
         
         if(n < 0){
          error("recvfrom");   
@@ -233,8 +233,8 @@ void *Prod_enlace(void *thread)
         write(1, buf, n);
         
         
-        //strcpy(data_rcv.buffer,buf);///<---------------------------
-        //data_rcv.tam_buffer = strlen(buf);
+        strcpy(data_rcv.buffer,buf);///<---------------------------
+        data_rcv.tam_buffer = strlen(buf);
         
         
         //RECALCULA CHECKSUM
@@ -328,7 +328,7 @@ void *Cons_enlace(void *thread){
         
     set_garbler(0, 0, 0);
         
-    n=sendto_garbled(sock,&data_env,strlen(buffer),0,&server,length);
+    n=sendto_garbled(sock,buffer,strlen(buffer),0,&server,length);
     
     if(n < 0 ){
         error("Sendto");
