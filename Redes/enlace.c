@@ -31,6 +31,7 @@ struct NO nos[6];
 
 struct threadsParam{
     int no;
+    int tam;
     char data[1024];
     
 };
@@ -113,7 +114,7 @@ int iniciaEnlace(int no, char *argv){
           }while(ret >= 3);
 
         
-        printf("PASSOU\n");
+        
   
 
         
@@ -121,7 +122,7 @@ int iniciaEnlace(int no, char *argv){
 
 
 //Testando funcoes
-
+/*
   printf("%d: IP:::::::::%s,PORTA = %d\n",nos[0].no,nos[0].ip,nos[0].porta );
   printf("%d: IP:::::::::%s,PORTA = %d\n",nos[1].no,nos[1].ip,nos[1].porta );
   printf("%d: IP:::::::::%s,PORTA = %d\n",nos[2].no,nos[2].ip,nos[2].porta );
@@ -143,7 +144,7 @@ int iniciaEnlace(int no, char *argv){
     
     
   
-    
+  */  
   recebeEnlace();
   return 0;
 }
@@ -200,10 +201,10 @@ void *Prod_enlace(void *thread)
         
          pthread_mutex_lock(&rcv1);
          
-         printf("\nRecebe executando...e esperando\n");
+         /*printf("\nRecebe executando...e esperando\n");
          printf("\nFRI:%s\n\n", nos[1].ip);
-        printf("RECEBE:::::IP:::::%s PORTA::::%d",nos[no_do_enlace-1].ip,nos[no_do_enlace-1].porta);
-        
+         printf("RECEBE:::::IP:::::%s PORTA::::%d",nos[no_do_enlace-1].ip,nos[no_do_enlace-1].porta);
+        */
         /*
         
 
@@ -221,7 +222,7 @@ void *Prod_enlace(void *thread)
         */
         
         
-        n = recvfrom(sock,buf,1024,0,(struct sockaddr *)&from,&fromlen);
+        n = recvfrom(sock,&data_rcv,1024,0,(struct sockaddr *)&from,&fromlen);
         
         if(n < 0){
          error("recvfrom");   
@@ -232,8 +233,8 @@ void *Prod_enlace(void *thread)
         write(1, buf, n);
         
         
-        strcpy(data_rcv.buffer,buf);///<---------------------------
-        data_rcv.tam_buffer = strlen(buf);
+        //strcpy(data_rcv.buffer,buf);///<---------------------------
+        //data_rcv.tam_buffer = strlen(buf);
         
         
         //RECALCULA CHECKSUM
@@ -246,12 +247,12 @@ void *Prod_enlace(void *thread)
             
            error("sendTo"); 
         }*/
-        
+         pthread_mutex_unlock(&rcv2);
         
     }
     
     
-    pthread_mutex_unlock(&rcv2);
+   
     //FUNCAO PARA CHAMAR RECEBE DO TESTE ou loop infinito??
     
    
@@ -266,7 +267,7 @@ void *Cons_enlace(void *thread){
     
     int teste;
     printf("\nEnvia executando...\n");
-    printf("\n%d ::: %s\n",readParams->no, readParams->data);
+    //printf("\n%d ::: %s\n",readParams->no, readParams->data);
     int sock,length, n;
     struct sockaddr_in server;
     struct sockaddr_in from;
@@ -285,8 +286,9 @@ void *Cons_enlace(void *thread){
     
         
         mtu = getMtu(no_do_enlace,readParams->no);
-        printf("ENVIA::::IP:::::%s PORTA::::%d",nos[readParams->no-1].ip,nos[readParams->no-1].porta);
-        printf("Mtu:::%d\n\n",mtu);
+        
+        //printf("ENVIA::::IP:::::%s PORTA::::%d",nos[readParams->no-1].ip,nos[readParams->no-1].porta);
+        //printf("Mtu:::%d\n\n",mtu);
         
     if(sock < 0){
         error("socket");
@@ -313,19 +315,27 @@ void *Cons_enlace(void *thread){
     fgets(buffer,255,stdin);
     
     //scanf("%d",&teste);
-    
-    strcpy(buffer,readParams->data);
-    
+    //Passando para a struct
+    strcpy(data_env.buffer,readParams->data);
+    data_env.tam_buffer = readParams->tam;
+    data_env.no_envio = readParams->no;
     
     
     //CHECKSUM
+    
         
+    //Garbler
         
-    n=sendto(sock,buffer,strlen(buffer),0,&server,length);
+    set_garbler(0, 0, 0);
+        
+    n=sendto_garbled(sock,&data_env,strlen(buffer),0,&server,length);
     
     if(n < 0 ){
         error("Sendto");
+        
     }
+        
+        printf("Datagrama Enviado\n");
     //RECEBE GOT YOUR MESSAGE
     /*n=recvfrom(sock,buffer,256,0,&from,&length);
 
@@ -357,12 +367,13 @@ int enviaEnlace(int no, char datagrama[], int tamanho){
     
     pthread_t t1;
     struct threadsParam readParams;
-    printf("CHEGOU o %s",datagrama);
+    
+    //printf("CHEGOU o %s",datagrama);
     
     
     readParams.no = no;
     strcpy(readParams.data,datagrama);
-    
+    readParams.tam = tamanho;
     
     pthread_create(&t1, NULL, Cons_enlace, (void *)(&readParams));
     pthread_join(t1, NULL);

@@ -19,7 +19,7 @@ int main(int argc, char *argv[])
     }
     
     
-    printf("NOME DO ARQUIVO :::::%s",argv[1]);
+    //printf("NOME DO ARQUIVO :::::%s",argv[1]);
     int no_inicio =0;
     
     no_inicio = atoi(argv[2]);

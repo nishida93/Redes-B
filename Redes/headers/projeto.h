@@ -37,11 +37,11 @@ struct NO{
 
 
 struct datagrama {
-    int type;
+    
     int tam_buffer;
     int  no_envio;
     char buffer[100];
-    int erro;
+   
 };
 
 

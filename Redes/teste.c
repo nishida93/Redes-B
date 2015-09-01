@@ -69,6 +69,8 @@ void *Prod_teste()
     
     int no=10;
     char *datagrama;
+    
+    while(1){
     //Mutex
     pthread_mutex_lock(&env1);
     
@@ -86,7 +88,7 @@ void *Prod_teste()
     //fgets(buffer, bufsize, stdin);
     
     scanf("%s",data_env.buffer);
-    printf("Data::: %s\n\n",data_env.buffer);
+    //printf("Data::: %s\n\n",data_env.buffer);
     
     data_env.tam_buffer = strlen(data_env.buffer);
     data_env.no_envio = no;
@@ -94,6 +96,8 @@ void *Prod_teste()
     //Chama envia enlace;
     enviaEnlace(data_env.no_envio,data_env.buffer, data_env.tam_buffer);
     pthread_mutex_lock(&env2);
+        
+    }
 }
 
 
@@ -114,19 +118,17 @@ void *Cons_teste()
         //Trava mutex de sincronismo
         pthread_mutex_lock(&rcv2);
 
-        printf("Teste_enlace.c (Receber) = > Type: '%d', Tam_buffer: '%d' Bytes, Buffer: '%s'\n", data_rcv.type, data_rcv.tam_buffer,
-                data_rcv.buffer);
+        
 
         if (data_rcv.tam_buffer != 0) {
 
-        printf("Teste_enlace.c (Receber) = > Type: '%d', Tam_buffer: '%d' Bytes, Buffer: '%s'\n", data_rcv.type, data_rcv.tam_buffer,
-                data_rcv.buffer);
+        printf("Teste-> Tam_buffer: %d Bytes, Buffer: %s\n", data_rcv.tam_buffer, data_rcv.buffer);
 
-        data_rcv.erro = -1;
-
-        }
-       
         pthread_mutex_unlock(&rcv1);
+
+       }
+       
+        
     }
         
         

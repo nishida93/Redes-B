@@ -30,11 +30,11 @@
 #include <netdb.h>
 
 struct datagrama {
-    int type;
+    
     int tam_buffer;
     int  no_envio;
     char buffer[100];
-    int erro;
+   
 };
 
 //Struct No -- Armazena as informações dos nos
