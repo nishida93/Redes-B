@@ -41,12 +41,17 @@ struct datagrama {
     int tam_buffer;
     int  no_envio;
     char buffer[100];
-   
+    
+};
+
+struct getInfo{
+    int no_de_inicio;
+    char arg[100];
 };
 
 
 struct datagrama data_env, data_rcv;
-
+struct getInfo info;
 pthread_mutex_t env1, env2;
 pthread_mutex_t rcv1, rcv2;
 

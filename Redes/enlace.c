@@ -27,22 +27,17 @@ struct NO nos[6];
 //nos[1] guarda as informacoes do no 2.
 //etc..
  
+int CheckSum(void *);
 
 
-struct threadsParam{
-    int no;
-    int tam;
-    char data[1024];
-    
-};
 
-
+int checksum; 
 
 int no_do_enlace; // Numero do nó iniciado;
 
-int iniciaEnlace(int no, char *argv){
+int iniciaEnlace(){
 
-  no_do_enlace = no;
+  no_do_enlace = info.no_de_inicio;
  
 
   int node=0;     
@@ -61,7 +56,7 @@ int iniciaEnlace(int no, char *argv){
   int ret=6;
 
     
-  arq = fopen(argv, "r");
+  arq = fopen(info.arg, "r");
     
     
   if(arq == NULL)
@@ -72,7 +67,7 @@ int iniciaEnlace(int no, char *argv){
       
        fscanf(arq,"%s",str);
 
-    char aux[10]="";
+       char aux[10]="";
           do{
              
               
@@ -83,16 +78,15 @@ int iniciaEnlace(int no, char *argv){
             if(node != 4){    
               
             
-             nos[node].no = number;
-             nos[node].porta = porta;
+            nos[node].no = number;
+            nos[node].porta = porta;
             fflush(stdout);
-                 fflush(stdin);
-             sprintf(nos[node].ip,"%d.%d.%d.%d",elem1,elem2,elem3,elem4);
-               fflush(stdin);
-                 fflush(stdout);
+            fflush(stdin);
+            sprintf(nos[node].ip,"%d.%d.%d.%d",elem1,elem2,elem3,elem4);
+            fflush(stdin);
+            fflush(stdout);
                 
-            //printf("\nFRI:%s\n\n", nos[3].ip);
-                //strcpy(nos[node].ip,nos[node].ip);
+            
              node++;
             }
           }
@@ -105,7 +99,7 @@ int iniciaEnlace(int no, char *argv){
             ret = fscanf(arq,"%d -> %d, MTU = %d;", &number,&elem1,&elem2);
             
             if(ret >= 3){
-             // printf("%d -> %d, MTU = %d;\n", number,elem1,elem2);
+             
               matriz[number-1][elem1-1]=1;
               matriz[elem1-1][number-1]=1;
               mtu[number-1][elem1-1]=elem2;
@@ -144,13 +138,13 @@ int iniciaEnlace(int no, char *argv){
     
     
   
-  */  
-  recebeEnlace();
+  */ 
+  iniciaThreads();
   return 0;
 }
 
 
-//Threads Produtor e Consumido  -------------
+//Threads Produtor e Consumidor  -------------
 
 void error(char *msg){
  perror(msg);
@@ -195,31 +189,14 @@ void *Prod_enlace(void *thread)
         error("binding");
     }
     
-    fromlen = sizeof(struct sockaddr_in);
+    
     
     while(1){
-        
+      
+        //Mutex
          pthread_mutex_lock(&rcv1);
+         fromlen = sizeof(struct sockaddr_in);
          
-         /*printf("\nRecebe executando...e esperando\n");
-         printf("\nFRI:%s\n\n", nos[1].ip);
-         printf("RECEBE:::::IP:::::%s PORTA::::%d",nos[no_do_enlace-1].ip,nos[no_do_enlace-1].porta);
-        */
-        /*
-        
-
-    while (TRUE) {
-
-        struct frame frame_rcv;
-        int sum = 0;
-
-        from_address_size = sizeof (from);
-        if (recvfrom(s, &frame_rcv, sizeof (frame_rcv), 0, (struct sockaddr *) &from, &from_address_size) < 0) {
-            perror("recvfrom()");
-            exit(1);
-        }
-        
-        */
         
         
         n = recvfrom(sock,buf,1024,0,(struct sockaddr *)&from,&fromlen);
@@ -233,27 +210,36 @@ void *Prod_enlace(void *thread)
         write(1, buf, n);
         
         
-        strcpy(data_rcv.buffer,buf);///<---------------------------
+        
+        strcpy(data_rcv.buffer,"");
+        strcpy(data_rcv.buffer,buf);///<---------------------------Atribui valores para a struct de recebimento
         data_rcv.tam_buffer = strlen(buf);
         
         
-        //RECALCULA CHECKSUM
+        int check = CheckSum(&data_rcv);;
+
+       
+
+            //RECALCULA CHECKSUM
+        if (checksum == check){
+            printf("Datagrama sem erro\n");
+        }
+        else {
+            printf("Datagrama com erro\n");
+        
+        }
         
         
-        //Mensagem Confirmando Recebimento
-        /*n=sendto(sock,"Got your message\n",17,0,(struct sockaddr *)&from,fromlen);
+   
         
-        if(n < 0){
-            
-           error("sendTo"); 
-        }*/
+        
          pthread_mutex_unlock(&rcv2);
         
     }
     
     
    
-    //FUNCAO PARA CHAMAR RECEBE DO TESTE ou loop infinito??
+    
     
    
    
@@ -261,13 +247,15 @@ void *Prod_enlace(void *thread)
 
 //Envia Datagrama
 void *Cons_enlace(void *thread){
-  struct threadsParam *readParams = thread;
- // char *dado = datagram;  
+    int id=*(int *)thread;
+ 
 
     
     int teste;
+    
+    //printf("\n%d ::: %s\n",data_env->no, data_env->data);
+    while(1){
     printf("\nEnvia executando...\n");
-    //printf("\n%d ::: %s\n",readParams->no, readParams->data);
     int sock,length, n;
     struct sockaddr_in server;
     struct sockaddr_in from;
@@ -279,16 +267,18 @@ void *Cons_enlace(void *thread){
     char buffer[256];
     
     pthread_mutex_lock(&env2);
-    
+
     sock = socket(AF_INET, SOCK_DGRAM,0);
     
-    if(tem_ligacao(no_do_enlace,readParams->no)){
+    if(data_env.tam_buffer != 0){    
+        
+    if(tem_ligacao(no_do_enlace,data_env.no_envio)){
     
         
-        mtu = getMtu(no_do_enlace,readParams->no);
+        mtu = getMtu(no_do_enlace,data_env.no_envio);
         
-        //printf("ENVIA::::IP:::::%s PORTA::::%d",nos[readParams->no-1].ip,nos[readParams->no-1].porta);
-        //printf("Mtu:::%d\n\n",mtu);
+        printf("ENVIA::::IP:::::%s PORTA::::%d",nos[data_env.no_envio-1].ip,nos[data_env.no_envio-1].porta);
+        printf("Mtu:::%d\n\n",mtu);
         
     if(sock < 0){
         error("socket");
@@ -298,7 +288,7 @@ void *Cons_enlace(void *thread){
         
         
     server.sin_family = AF_INET;
-    hp = gethostbyname(nos[readParams->no-1].ip); //Localhost
+    hp = gethostbyname(nos[data_env.no_envio-1].ip); //Localhost
     
     if(hp == 0){
         error("Uknown host");
@@ -306,7 +296,7 @@ void *Cons_enlace(void *thread){
     }
         
     bcopy((char *)hp->h_addr, (char *)&server.sin_addr,hp->h_length);
-    server.sin_port = htons(nos[readParams->no-1].porta); //5000
+    server.sin_port = htons(nos[data_env.no_envio-1].porta); //5000
     length=sizeof(struct sockaddr_in);
     
     //TESTA MTU
@@ -314,17 +304,26 @@ void *Cons_enlace(void *thread){
     bzero(buffer, 256);
     fgets(buffer,255,stdin);
     
-    //scanf("%d",&teste);
-    //Passando para a struct
-    strcpy(buffer,readParams->data);    
-    strcpy(data_env.buffer,readParams->data);
-    data_env.tam_buffer = readParams->tam;
-    data_env.no_envio = readParams->no;
+    
+    strcpy(buffer,data_env.buffer);    
     
     
+    
+    if(sizeof(buffer) > mtu){
+        error("MTU Error-> Nao foi possivel enviar o pacote");
+        
+        
+    }
+        
     //CHECKSUM
         
+       
         
+    
+    checksum = CheckSum(&data_env);
+    printf("check::: %d\n\n",checksum);
+        
+
         
     
         
@@ -335,73 +334,45 @@ void *Cons_enlace(void *thread){
     n=sendto_garbled(sock,buffer,strlen(buffer),0,&server,length);
     
     if(n < 0 ){
-        error("Sendto");
+        error("Sendto_garbled");
         
     }
         
         printf("Datagrama Enviado\n");
-    //RECEBE GOT YOUR MESSAGE
-    /*n=recvfrom(sock,buffer,256,0,&from,&length);
-
-    if(n < 0){
-        error("recvfrom");
-    }
-    
-        write(1,"\nGot an ack: ",14);
-        write(1,buffer,n);*/
     }
     else{
         
         fprintf(stdout,"\nNós não são vizinhos\n");
         
     }
-    
-    pthread_mutex_unlock(&env1);
-    
-}
-
-
-
-
-//Cria a thread Cons_Enlace
-int enviaEnlace(int no, char datagrama[], int tamanho){
-
-
-  //dispara uma thrread que envia para um nó. da thread crriada em inicia enlace
-    
-    pthread_t t1;
-    struct threadsParam readParams;
-    
-    //printf("CHEGOU o %s",datagrama);
-    
-    
-    readParams.no = no;
-    strcpy(readParams.data,datagrama);
-    readParams.tam = tamanho;
-    
-    pthread_create(&t1, NULL, Cons_enlace, (void *)(&readParams));
-    pthread_join(t1, NULL);
-    //printf("No : %d Datagrama : %s Tamanho : %d\n\n", no, datagrama, tamanho);
-    
    
-    printf("\n\n");
-	return 0;
+    pthread_mutex_unlock(&env1);
+        
+    }
+ }//Fecha While
 }
 
 
-//Cria a thread Prod_Enlace
-int recebeEnlace(){
+
+
+int iniciaThreads(){
+
+    pthread_t t1;
     
-    //dispara thread recv
+    int a1 = 1;
+
+    
+    pthread_create(&t1, NULL, Cons_enlace, (void *)(&a1));
     
     pthread_t t2;
     
     int a2 = 2;
-    printf("recebe\n\n");
+
     
     pthread_create(&t2, NULL, Prod_enlace, (void *)(&a2));
     
-    //pthread_join(t2, NULL);
+    pthread_join(t1, NULL);
+    pthread_join(t2, NULL);
     return 0;   
 }
 
@@ -459,3 +430,15 @@ int getMtu(int no1, int no2){
 
 }
 
+int CheckSum(void *cnf)
+ {
+     int i;
+     int chk=0;
+     unsigned char *data;
+ 
+     data = cnf;
+     data += 2;    //To get pointer past checksum;
+ 
+     for (i=2; i < sizeof(struct datagrama); i++) chk += *data++;
+     return chk;
+ } 

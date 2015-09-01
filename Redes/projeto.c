@@ -11,7 +11,8 @@
  */
 int main(int argc, char *argv[])
 {
-
+    int te, tt;
+    pthread_t te_iniciaEnlace, tt_iniciaTeste;
     
     if (argc != 3) {
         printf("Entry: %s fileName.conf Numero_No\n", argv[0]);
@@ -32,6 +33,11 @@ int main(int argc, char *argv[])
      scanf("%d", &no_inicio);
     }
     
+    //GetInfo
+    
+    info.no_de_inicio = no_inicio;
+    strcpy(info.arg,argv[1]);
+    
     //Inicia os Mutexes
     
     if (pthread_mutex_init(&env1, NULL) != 0){
@@ -51,9 +57,40 @@ int main(int argc, char *argv[])
         return 1;
     }
     
+
+    data_env.tam_buffer = 0;
+    data_env.no_envio = 0;
+
+    data_rcv.tam_buffer = 0;
+    data_rcv.no_envio = 0;
     
-    iniciaEnlace(no_inicio, argv[1]);
-    iniciaTeste();
+    
+    tt = pthread_create(&tt_iniciaTeste, NULL, iniciaTeste , NULL);
+
+    if (tt) {
+        printf("error: impossivel criar a thread do teste \n");
+        exit(-1);
+    }
+    
+    
+    te = pthread_create(&te_iniciaEnlace, NULL, iniciaEnlace, NULL);
+
+    if (te) {
+        printf("error: impossivel criar a thread do enlace\n");
+        exit(-1);
+    }
+
+  
+
+    
+    
+
+    //Espera as threads terminarem
+    pthread_join(te_iniciaEnlace, NULL);
+    pthread_join(tt_iniciaTeste, NULL);
+    
+    
+    
 
     
 

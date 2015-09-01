@@ -46,7 +46,9 @@ int iniciaTeste(){
 
     
     //Aguarda o termino das threads
+    
     pthread_join(te_teste, NULL);
+    printf("Nao pode ser2222");
     pthread_join(tr_teste, NULL);
     
     
@@ -67,21 +69,24 @@ void *Prod_teste()
     
     
     
+    
+    while (1) {
+   
+    //Mutex
+        
+    pthread_mutex_lock(&env1);
+        
     int no=10;
     char *datagrama;
     
-    while(1){
-    //Mutex
-    pthread_mutex_lock(&env1);
     
     
-    fflush(stdout);
     printf("Deseja enviar para qual nó?\n");
     scanf("%d", &no); 
     
     printf("Escreva uma mensagem para enviar:\n");
   
-    fflush(stdout);
+    
     //const int bufsize = 4096; 
     //char buffer[bufsize];
 
@@ -94,9 +99,10 @@ void *Prod_teste()
     data_env.no_envio = no;
     
     //Chama envia enlace;
-    enviaEnlace(data_env.no_envio,data_env.buffer, data_env.tam_buffer);
-    pthread_mutex_lock(&env2);
+    
         
+    pthread_mutex_unlock(&env2);
+    //pthread_mutex_unlock(&env1);
     }
 }
 
@@ -123,7 +129,7 @@ void *Cons_teste()
         if (data_rcv.tam_buffer != 0) {
 
         printf("\n\nTeste-> Tam_buffer: %d Bytes, Buffer: %s\n", data_rcv.tam_buffer, data_rcv.buffer);
-
+        
         pthread_mutex_unlock(&rcv1);
 
        }

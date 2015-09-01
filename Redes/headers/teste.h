@@ -47,6 +47,13 @@ struct NO{
     
 };
 
+struct getInfo{
+    int no_de_inicio;
+    char arg[100];
+};
+
+
+
 //nos[0] guarda as informacoes do no 1.
 //nos[1] guarda as informacoes do no 2.
 //etc..
@@ -56,7 +63,7 @@ struct NO{
 
 
 extern struct datagrama data_env, data_rcv;
-
+extern struct getInfo info;
 pthread_mutex_t env1, env2;
 pthread_mutex_t rcv1, rcv2;
 

@@ -34,12 +34,14 @@ struct datagrama {
     int tam_buffer;
     int  no_envio;
     char buffer[100];
-   
+    
 };
 
 //Struct No -- Armazena as informações dos nos
 
-
+//nos[0] guarda as informacoes do no 1.
+//nos[1] guarda as informacoes do no 2.
+//etc..
 struct NO{
     int no;
     int porta;
@@ -47,16 +49,19 @@ struct NO{
     
 };
 
-//nos[0] guarda as informacoes do no 1.
-//nos[1] guarda as informacoes do no 2.
-//etc..
+
+struct getInfo{
+    int no_de_inicio;
+    char arg[100];
+};
+
  
 
 
 
 
 extern struct datagrama data_env, data_rcv;
-
+extern struct getInfo info;
 pthread_mutex_t env1, env2;
 pthread_mutex_t rcv1, rcv2;
 
@@ -88,7 +93,7 @@ void *envia(void *);
 void *recebe(void *);
 
 int recebeEnlace();
-
+int enviaEnlace();
 
 /*
 
