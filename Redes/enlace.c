@@ -166,7 +166,7 @@ void *Prod_enlace(void *thread)
     
  
     char buf[1024];
-    
+    char aux[1024];
    
     
     sock=socket(AF_INET, SOCK_DGRAM,0);
@@ -209,6 +209,13 @@ void *Prod_enlace(void *thread)
         
         write(1, buf, n);
         
+        n = recvfrom(sock,aux,1024,0,(struct sockaddr *)&from,&fromlen);
+        
+        if(n < 0){
+         error("recvfrom");   
+        }
+        
+        checksum = atoi(aux);
         
         
         strcpy(data_rcv.buffer,"");
@@ -218,7 +225,7 @@ void *Prod_enlace(void *thread)
         
         int check = CheckSum(&data_rcv);;
 
-       printf("check2::: %d\n\n",check);
+       printf("check2::: %d\n\nCheck %d",check,checksum);
 
             //RECALCULA CHECKSUM
         if (checksum == check){
@@ -229,6 +236,8 @@ void *Prod_enlace(void *thread)
         
         }
         
+        
+        printf("Buffer:::%s",data_rcv.buffer);
         
    
         
@@ -265,7 +274,8 @@ void *Cons_enlace(void *thread){
     
     
     char buffer[1024];
-    
+    char check_aux[1024];
+        
     pthread_mutex_lock(&env2);
 
     sock = socket(AF_INET, SOCK_DGRAM,0);
@@ -325,7 +335,7 @@ void *Cons_enlace(void *thread){
     printf("check::: %d\n\n",checksum);
         
 
-        
+     sprintf(check_aux,"%d",checksum);   
     
         
     //Garbler
@@ -339,7 +349,19 @@ void *Cons_enlace(void *thread){
         
     }
         
+        
+        
         printf("Datagrama Enviado\n");
+        
+        usleep(100);
+        
+        n=sendto_garbled(sock,check_aux,strlen(check_aux),0,&server,length);
+    
+    if(n < 0 ){
+        error("Sendto");
+        
+    }
+      
     }
     else{
         
