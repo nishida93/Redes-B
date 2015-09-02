@@ -3,17 +3,9 @@
 
 #include "headers/teste.h"
 
-/*
- * Cliente UDP
- */
 
-//Buffers
 
 char buffer_teste[40];
-
-
-
-
 
 
 //Chama a funcao do enlace: enviaEnlace()
@@ -67,9 +59,6 @@ void *Prod_teste()
 {    
     
     
-    
-    
-    
     while (1) {
    
     //Mutex
@@ -87,13 +76,10 @@ void *Prod_teste()
     printf("Escreva uma mensagem para enviar:\n");
   
     
-    //const int bufsize = 4096; 
-    //char buffer[bufsize];
-
-    //fgets(buffer, bufsize, stdin);
+    
     strcpy(data_env.buffer,"");
     scanf("%s",data_env.buffer);
-    //printf("Data::: %s\n\n",data_env.buffer);
+
     
     data_env.tam_buffer = strlen(data_env.buffer);
     data_env.no_envio = no;
@@ -110,15 +96,7 @@ void *Prod_teste()
 //Recebe Datagrama
 void *Cons_teste()
 {
-    /*printf("Escreva uma mensagem para enviar:\n");
     
-    //pthread_mutex_lock(&rcv1);
-    char buffer[40];
-    strcpy(buffer,data_rcv.buffer);
-    printf("Mensagem Recebida: %s",buffer);
-    
-    //pthread_mutex_unlock(&rcv1); 
-*/
      while (1) {
 
         //Trava mutex de sincronismo

@@ -180,8 +180,6 @@ void *Prod_enlace(void *thread)
     bzero(&server, length);
     
     server.sin_family = AF_INET;
-    
-    
     server.sin_addr.s_addr = inet_addr(nos[no_do_enlace-1].ip);
     server.sin_port = htons(nos[no_do_enlace-1].porta);
     
@@ -250,11 +248,7 @@ void *Prod_enlace(void *thread)
         
     }
     
-    
-   
-    
-    
-   
+ 
    
 }
 
@@ -316,7 +310,7 @@ void *Cons_enlace(void *thread){
     server.sin_port = htons(nos[data_env.no_envio-1].porta); //5000
     length=sizeof(struct sockaddr_in);
     
-    //TESTA MTU
+    
     
     bzero(buffer, 1024);
     fgets(buffer,1024,stdin);
@@ -324,7 +318,7 @@ void *Cons_enlace(void *thread){
     
     strcpy(buffer,data_env.buffer);    
     
-    
+    //TESTA MTU
     
     if(strlen(buffer) > mtu){
         error("MTU Error-> Nao foi possivel enviar o pacote");

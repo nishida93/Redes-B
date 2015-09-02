@@ -6,9 +6,7 @@
 
 
 
-/*
- * Cliente UDP
- */
+
 int main(int argc, char *argv[])
 {
     int te, tt;
@@ -96,11 +94,6 @@ int main(int argc, char *argv[])
     
     
     
-
-    
-
-
-	//Compilar o negocio estranho, fundi teste e enlace
 	return 0;
 }
 
