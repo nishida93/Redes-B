@@ -214,7 +214,7 @@ void *Prod_enlace(void *thread)
         strcpy(data_rcv.buffer,"");
         strcpy(data_rcv.buffer,buf);///<---------------------------Atribui valores para a struct de recebimento
         data_rcv.tam_buffer = strlen(buf);
-        
+        data_rcv.no_envio = no_do_enlace;
         
         int check = CheckSum(&data_rcv);;
 
@@ -264,7 +264,7 @@ void *Cons_enlace(void *thread){
     int mtu=0;
     
     
-    char buffer[256];
+    char buffer[1024];
     
     pthread_mutex_lock(&env2);
 
@@ -302,8 +302,8 @@ void *Cons_enlace(void *thread){
     
     //TESTA MTU
     
-    bzero(buffer, 256);
-    fgets(buffer,255,stdin);
+    bzero(buffer, 1024);
+    fgets(buffer,1024,stdin);
     
     
     strcpy(buffer,data_env.buffer);    
