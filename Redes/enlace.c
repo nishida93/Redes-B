@@ -217,22 +217,21 @@ void *Prod_enlace(void *thread)
         
         checksum = atoi(aux);
         
-        int i=0;
-        for(i; i < 1024; i++){
-            data_rcv.buffer[i]="";
-            
-        }
+        
+        
         
         strcpy(data_rcv.buffer,"");
         strcpy(data_rcv.buffer,buf);///<---------------------------Atribui valores para a struct de recebimento
         data_rcv.tam_buffer = strlen(buf);
         data_rcv.no_envio = no_do_enlace;
         
+        
+        //RECALCULA CHECKSUM
         int check = checkSum(&data_rcv);;
 
-       printf("\ncheck2::: %d\n\nCheck %d::::%lu",check,checksum,strlen(buf));
+        printf("\ncheck2::: %d\n\nCheck %d::::%lu",check,checksum,strlen(buf));
 
-            //RECALCULA CHECKSUM
+            
         if (checksum == check){
             printf("Datagrama sem erro\n");
         }
