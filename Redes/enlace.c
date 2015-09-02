@@ -27,7 +27,7 @@ struct NO nos[6];
 //nos[1] guarda as informacoes do no 2.
 //etc..
  
-int CheckSum(void *);
+int checkSum(void *);
 
 
 
@@ -205,7 +205,7 @@ void *Prod_enlace(void *thread)
          error("recvfrom");   
         }
         
-        write(1,"Received a datagram: ",21);
+        write(1,"Datagrama Recebido: ",20);
         
         write(1, buf, n);
         
@@ -217,15 +217,20 @@ void *Prod_enlace(void *thread)
         
         checksum = atoi(aux);
         
+        int i=0;
+        for(i; i < 1024; i++){
+            data_rcv.buffer[i]="";
+            
+        }
         
         strcpy(data_rcv.buffer,"");
         strcpy(data_rcv.buffer,buf);///<---------------------------Atribui valores para a struct de recebimento
         data_rcv.tam_buffer = strlen(buf);
         data_rcv.no_envio = no_do_enlace;
         
-        int check = CheckSum(&data_rcv);;
+        int check = checkSum(&data_rcv);;
 
-       printf("check2::: %d\n\nCheck %d",check,checksum);
+       printf("\ncheck2::: %d\n\nCheck %d::::%lu",check,checksum,strlen(buf));
 
             //RECALCULA CHECKSUM
         if (checksum == check){
@@ -295,7 +300,9 @@ void *Cons_enlace(void *thread){
         
     }
     
+    //Limpa Buffer
         
+    strcpy(buffer,"");
         
     server.sin_family = AF_INET;
     hp = gethostbyname(nos[data_env.no_envio-1].ip); //Localhost
@@ -331,7 +338,7 @@ void *Cons_enlace(void *thread){
        
         
     
-    checksum = CheckSum(&data_env);
+    checksum = checkSum(&data_env);
     printf("check::: %d\n\n",checksum);
         
 
@@ -460,15 +467,17 @@ int getMtu(int no1, int no2){
 
 }
 
-int CheckSum(void *cnf)
+int checkSum(void *sum)
  {
      int i;
-     int chk=0;
+     int check=0;
      unsigned char *data;
  
-     data = cnf;
-     data += 2;    //To get pointer past checksum;
+     data = sum;
+     data += 2;    
  
-     for (i=2; i < sizeof(struct datagrama); i++) chk += *data++;
-     return chk;
+     for (i=2; i < sizeof(struct datagrama); i++) {
+         check += *data++;
+     }
+     return check;
  } 

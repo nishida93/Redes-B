@@ -91,7 +91,7 @@ void *Prod_teste()
     //char buffer[bufsize];
 
     //fgets(buffer, bufsize, stdin);
-    
+    strcpy(data_env.buffer,"");
     scanf("%s",data_env.buffer);
     //printf("Data::: %s\n\n",data_env.buffer);
     
