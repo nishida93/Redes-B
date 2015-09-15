@@ -90,7 +90,7 @@ int iniciaEnlace(){
              node++;
             }
           }
-          }while(ret >= 6);
+        }while(ret >= 6);
 
         ret=3;
         fscanf(arq,"%s",str);
@@ -196,8 +196,8 @@ void *Prod_enlace(void *thread)
          fromlen = sizeof(struct sockaddr_in);
          
         
-        
-        n = recvfrom(sock,buf,1024,0,(struct sockaddr *)&from,&fromlen);
+       
+        n = recvfrom(sock,&data_rcv, sizeof(data_rcv),0,(struct sockaddr *)&from,&fromlen);
         
         if(n < 0){
          error("recvfrom");   
@@ -205,7 +205,9 @@ void *Prod_enlace(void *thread)
         
         write(1,"Datagrama Recebido: ",20);
         
-        write(1, buf, n);
+        write(1, data_rcv.buffer, n);
+        
+        printf("DATA: %s\n\n", data_rcv.buffer);
         
         n = recvfrom(sock,aux,1024,0,(struct sockaddr *)&from,&fromlen);
         
@@ -335,14 +337,16 @@ void *Cons_enlace(void *thread){
     printf("check::: %d\n\n",checksum);
         
 
-     sprintf(check_aux,"%d",checksum);   
+    sprintf(check_aux,"%d",checksum);   
     
         
     //Garbler
         
     set_garbler(0, 0, 0);
         
-    n=sendto_garbled(sock,buffer,strlen(buffer),0,&server,length);
+        
+    
+    n=sendto_garbled(sock,&data_env,sizeof(data_env),0,(struct sockaddr *)&server,length);
     
     if(n < 0 ){
         error("Sendto_garbled");

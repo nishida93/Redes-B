@@ -34,7 +34,7 @@ struct datagrama {
     int tam_buffer;
     int  no_envio;
     char buffer[100];
-   
+    int checksum;
 };
 
 //Struct No -- Armazena as informações dos nos
