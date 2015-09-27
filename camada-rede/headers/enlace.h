@@ -23,7 +23,7 @@ struct tabela_rotas{
     int no_atual;
     int destino;
     int custo;
-    int saida;
+
 };
 
 struct datagrama {
@@ -89,7 +89,9 @@ extern int matriz[10][10];
 //mtu --  Matriz adjacente armazena os MTU dos enlaces.
 extern int mtu[10][10];
 
+extern int no_inicio;
 
+extern struct tabela_rotas tabela_rotas[6];
 
 
 extern struct NO nos[6];

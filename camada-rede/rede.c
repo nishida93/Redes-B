@@ -81,7 +81,7 @@ void *prod_Rede()
    
     //Mutex
         
-    pthread_mutex_lock(&env1);
+    pthread_mutex_lock(&env_tabela1);
         
     int no=10;
     char *datagrama;
@@ -105,7 +105,7 @@ void *prod_Rede()
     //Chama envia enlace;
     
         
-    pthread_mutex_unlock(&env2);
+    pthread_mutex_unlock(&env_tabela2);
     //pthread_mutex_unlock(&env1);
     }
 }
@@ -138,7 +138,83 @@ void *cons_Rede()
 
 void *enviaTabela(){
     
+    int teste;
     
+  
+    int i=0;  
+    while(1){
+    
+    int sock,length, n;
+    struct sockaddr_in server;
+    struct sockaddr_in from;
+    struct hostent *hp;
+    int mtu;
+      
+    if(i == 6){
+        
+     sleep(10);
+     i=0;
+    }
+        
+    i++;
+        
+   // pthread_mutex_lock(&env2);
+
+    sock = socket(AF_INET, SOCK_DGRAM,0);
+    
+       
+        
+    if(tem_ligacao(no_inicio,i)){
+    
+        
+        mtu = getMtu(no_inicio,i);
+        
+        
+        
+    if(sock < 0){
+        error("socket");
+        
+    }
+    
+    //Limpa Buffer
+        
+
+        
+    server.sin_family = AF_INET;
+    hp = gethostbyname(nos[i-1].ip); //Localhost
+    
+    if(hp == 0){
+        error("Uknown host");
+        
+    }
+       
+     
+    bcopy((char *)hp->h_addr, (char *)&server.sin_addr,hp->h_length);
+    server.sin_port = htons(nos[data_env.no_envio-1].porta); //5000
+    length=sizeof(struct sockaddr_in);
+    
+    
+    
+    set_garbler(0, 0, 0);
+        
+        printf("\nEnviando::: %s\n");
+    
+    n=sendto_garbled(sock,&tabela_rotas,sizeof(tabela_rotas),0,(struct sockaddr *)&server,length);
+    
+    if(n < 0 ){
+       // error("Sendto_garbled");
+        
+    }
+        
+        
+    printf("Tabela Enviada para i\n");
+        
+    }
+   
+   
+    pthread_mutex_unlock(&env1);
+        
+    }
     
 }
 
@@ -155,9 +231,56 @@ void *atualizarTabela(){
 
 void criarTabelaDeRotas(){
     
+    int i,j;
+    
+    printf("\n");
+  print_matriz(4,4);
+  printf("\n");
+  print_mtu(4,4);
+  printf("\n");
+    
+    for(i = 0; i < 6; i++){
+        tabela_rotas[i].no_atual = i + 1;
+        
+    }
+    
+    
+    for(i = 0; i < 6;i++){
+     
+        
+     if(tem_ligacao(no_inicio,i+1)){
+        tabela_rotas[i].destino = i+1;
+        tabela_rotas[i].custo = 1;
+         
+    }
+    
+    if(!tem_ligacao(no_inicio,i+1)){   
+        printf("\nI + 1 = %d ", i+1);
+        tabela_rotas[i].destino = -1; 
+        tabela_rotas[i].custo = -1;
+    }
+        
+    if(no_inicio == i + 1){
+      tabela_rotas[no_inicio-1].destino = no_inicio;  
+       tabela_rotas[no_inicio-1].custo = 0; 
+     }
     
     
 }
+
+
+    printf("Tem Ligacao:%d",tem_ligacao(no_inicio,2));
+    
+    for(i = 0; i < 6 ; i++){
+        
+    
+        printf("\n%d",tabela_rotas[i].no_atual);  
+     printf("\n%d",tabela_rotas[i].destino);
+     printf("\n%d\n",tabela_rotas[i].custo);
+    
+    }
+}
+
 
 
 

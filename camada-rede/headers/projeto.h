@@ -23,7 +23,7 @@ struct tabela_rotas{
     int no_atual;
     int destino;
     int custo;
-    int saida;
+    
 };
 
 struct NO{
@@ -58,12 +58,28 @@ int matriz[10][10];
 //mtu --  Matriz adjacente armazena os MTU dos enlaces.
 int mtu[10][10];
 
+int no_inicio;
 
-
+struct tabela_rotas tabela_rotas[6];
 
 struct NO nos[6];
 
 void iniciaEnlace(int, char []);
 void iniciaRede();
+
+//Mutex
+
+pthread_mutex_t mutex_rede_enlace_env1, mutex_rede_enlace_env2;
+pthread_mutex_t mutex_rede_enlace_rcv1, mutex_rede_enlace_rcv2;
+pthread_mutex_t mutex_rede_rede_atualizei1, mutex_rede_rede_atualizei2;
+pthread_mutex_t mutex_rede_rede_receberotas2;
+pthread_mutex_t mutex_rede_rede_env1, mutex_rede_rede_env2;
+pthread_mutex_t mutex_rede_rede_rcv1, mutex_rede_rede_rcv2;
+pthread_mutex_t mutex_trans_rede_env1, mutex_trans_rede_env2;
+pthread_mutex_t mutex_trans_rede_rcv1, mutex_trans_rede_rcv2;
+
+pthread_mutex_t env_tabela1;
+pthread_mutex_t env_tabela2;
+
 //void *iniciaEnlace();
 //void *iniciaTeste();
