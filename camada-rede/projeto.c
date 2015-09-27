@@ -5,8 +5,8 @@
 
 int main(int argc, char *argv[])
 {
-    int te, tt;
-    pthread_t te_iniciaEnlace, tt_iniciaRede;
+    int te, tr,tt;
+    pthread_t te_iniciaEnlace, tr_iniciaRede, tt_iniciaTransporte;
     
     if (argc != 3) {
         printf("Entry: %s fileName.conf Numero_No\n", argv[0]);
@@ -21,9 +21,9 @@ int main(int argc, char *argv[])
     
     
     
-    while(no_inicio > 4 || no_inicio < 1){
+    while(no_inicio > 6 || no_inicio < 1){
         
-     printf("Inicie um nó de 1 a 4\nNó:");
+     printf("Inicie um nó de 1 a 6\nNó:");
      scanf("%d", &no_inicio);
     }
     
@@ -80,7 +80,16 @@ int main(int argc, char *argv[])
     
     sleep(1);
     
-    tt = pthread_create(&tt_iniciaRede, NULL, iniciaRede , NULL);
+    tr = pthread_create(&tr_iniciaRede, NULL, iniciaRede , NULL);
+
+    if (tt) {
+        printf("error: impossivel criar a thread do teste \n");
+        exit(-1);
+    }
+    
+    sleep(1);
+    
+    tt = pthread_create(&tt_iniciaTransporte, NULL, iniciaTransporte , NULL);
 
     if (tt) {
         printf("error: impossivel criar a thread do teste \n");
@@ -97,7 +106,12 @@ int main(int argc, char *argv[])
 
     //Espera as threads terminarem
     pthread_join(te_iniciaEnlace, NULL);
-    pthread_join(tt_iniciaRede, NULL);
+    pthread_join(tr_iniciaRede, NULL);
+    pthread_join(tt_iniciaTransporte, NULL);
+    
+    
+    ////Destruir Mutexes
+    
     
     
     

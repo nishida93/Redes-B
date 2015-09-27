@@ -1,7 +1,6 @@
 
 
 
-#include "headers/teste.h"
 #include "headers/transporte.h"
 
 
@@ -10,18 +9,18 @@ char buffer_teste[40];
 
 //Chama a funcao do enlace: enviaEnlace()
 
-int iniciaTeste(){
+int *iniciaTransporte(){
 
 	//Troca de mensagens ou fila, serve para simular a camada de rede.
 	
     int te, tr;
-    pthread_t te_teste, tr_teste;
+    pthread_t te_trans, tr_trans;
 
     
     
    
 
-    te = pthread_create(&te_teste, NULL, Prod_teste, NULL);
+    te = pthread_create(&te_trans, NULL, prod_Transporte, NULL);
 
     if (te) {
         printf("ERRO: impossivel criar a thread");
@@ -29,7 +28,7 @@ int iniciaTeste(){
     }
 
     
-    tr = pthread_create(&tr_teste, NULL,Cons_teste, NULL);
+    tr = pthread_create(&tr_trans, NULL,cons_Transporte, NULL);
 
     if (tr) {
         printf("ERRO: impossivel criar a thread : receberDatagramas\n");
@@ -39,9 +38,9 @@ int iniciaTeste(){
     
     //Aguarda o termino das threads
     
-    pthread_join(te_teste, NULL);
+    pthread_join(te_trans, NULL);
     
-    pthread_join(tr_teste, NULL);
+    pthread_join(tr_trans, NULL);
     
     
     
@@ -55,7 +54,7 @@ int iniciaTeste(){
 
 
 //Envia Datagrama
-void *Prod_teste()
+void *prod_Transporte()
 {    
     
     
@@ -94,7 +93,7 @@ void *Prod_teste()
 
 
 //Recebe Datagrama
-void *Cons_teste()
+void *cons_Transporte()
 {
     
      while (1) {

@@ -85,8 +85,14 @@ extern pthread_mutex_t env_tabela2;
 
 ////Threads
 
-void *prod_Rede();
-void *cons_Rede();
-void *enviaTabela();
-void *recebeTabela();
+void *envia_DatagramaRede();
+void *recebe_DatagramaRede();
+void *envia_Tabela();
+void *recebe_Tabela();
+
+
 void criarTabelaDeRotas();
+void atualizaTabela();
+void enviaTabelaParaOsNosVizinhos();
+void recebeTabelaDosNos();
+void error(char *);

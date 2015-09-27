@@ -26,7 +26,7 @@ int checksum;
 
 int no_do_enlace; // Numero do nó iniciado;
 
-void iniciaEnlace(){
+void *iniciaEnlace(){
 
   no_do_enlace = info.no_de_inicio;
  
@@ -147,7 +147,7 @@ void error(char *msg){
 int v[10];
 
 //Recebe Datagrama
-void *Prod_enlace(void *thread)
+void *recebe_Datagrama(void *thread)
 {
   int id=*(int *)thread;
     
@@ -183,8 +183,8 @@ void *Prod_enlace(void *thread)
     while(1){
       
         //Mutex
-         pthread_mutex_lock(&rcv1);
-         fromlen = sizeof(struct sockaddr_in);
+        pthread_mutex_lock(&rcv1);
+        fromlen = sizeof(struct sockaddr_in);
          
         printf("\nSize:%d\n",sizeof(data_rcv));
        
@@ -258,7 +258,7 @@ void *Prod_enlace(void *thread)
 }
 
 //Envia Datagrama
-void *Cons_enlace(void *thread){
+void *envia_Datagrama(void *thread){
     int id=*(int *)thread;
  
 
@@ -406,13 +406,13 @@ int iniciaThreads(){
     //Recebe
     
     
-    pthread_create(&t1, NULL, Prod_enlace, (void *)(&a1));
+    pthread_create(&t1, NULL, recebe_Datagrama, (void *)(&a1));
     
     pthread_t t2;
     
     int a2 = 2;
     //Envia
-    pthread_create(&t2, NULL, Cons_enlace, (void *)(&a2));
+    pthread_create(&t2, NULL, envia_Datagrama, (void *)(&a2));
     
     
 

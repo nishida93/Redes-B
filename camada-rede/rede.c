@@ -10,7 +10,7 @@ char buffer_teste[40];
 
 //Chama a funcao do enlace: enviaEnlace()
 
-void iniciaRede(){
+void *iniciaRede(){
 
 	//Troca de mensagens ou fila, serve para simular a camada de rede.
 	
@@ -21,7 +21,7 @@ void iniciaRede(){
     
     criarTabelaDeRotas();
 
-    te = pthread_create(&te_rede, NULL, prod_Rede, NULL);
+    te = pthread_create(&te_rede, NULL, envia_DatagramaRede, NULL);
 
     if (te) {
         printf("ERRO: impossivel criar a thread");
@@ -29,14 +29,14 @@ void iniciaRede(){
     }
 
     
-    tr = pthread_create(&tr_rede, NULL,cons_Rede, NULL);
+    tr = pthread_create(&tr_rede, NULL,recebe_DatagramaRede, NULL);
 
     if (tr) {
         printf("ERRO: impossivel criar a thread : receberDatagramas\n");
         exit(-1);
     }
     
-    tet = pthread_create(&te_tabela_rotas, NULL, enviaTabela, NULL);
+    tet = pthread_create(&te_tabela_rotas, NULL,envia_Tabela, NULL);
 
     if (te) {
         printf("ERRO: impossivel criar a thread");
@@ -44,7 +44,7 @@ void iniciaRede(){
     }
 
     
-    trt = pthread_create(&tr_tabela_rotas, NULL,recebeTabela, NULL);
+    trt = pthread_create(&tr_tabela_rotas, NULL,recebe_Tabela, NULL);
 
     if (tr) {
         printf("ERRO: impossivel criar a thread : receberDatagramas\n");
@@ -73,159 +73,68 @@ void iniciaRede(){
 
 
 //Envia Datagrama
-void *prod_Rede()
+void *envia_DatagramaRede()
 {    
     
     
-    while (1) {
-   
-    //Mutex
-        
-    pthread_mutex_lock(&env_tabela1);
-        
-    int no=10;
-    char *datagrama;
     
-    
-    
-    printf("Deseja enviar para qual nó?\n");
-    scanf("%d", &no); 
-    
-    printf("Escreva uma mensagem para enviar:\n");
-  
-   
-    
-    strcpy(data_env.buffer,"");
-    scanf("%s",data_env.buffer);
-
-    printf("Matriz:%d\n",matriz[1][1]);
-    data_env.tam_buffer = strlen(data_env.buffer);
-    data_env.no_envio = no;
-    
-    //Chama envia enlace;
-    
-        
-    pthread_mutex_unlock(&env_tabela2);
-    //pthread_mutex_unlock(&env1);
-    }
 }
 
 
 //Recebe Datagrama
-void *cons_Rede()
+void *recebe_DatagramaRede()
 {
     
-     while (1) {
+     
 
-        //Trava mutex de sincronismo
-        pthread_mutex_lock(&rcv2);
-
-        
-
-        if (data_rcv.tam_buffer != 0) {
-
-        printf("\n\nTeste-> Tam_buffer: %d Bytes, Buffer: %s\n", data_rcv.tam_buffer, data_rcv.buffer);
-        
-        pthread_mutex_unlock(&rcv1);
-
-       }
-       
-        
-    }
         
         
 }
 
+
+
 void *enviaTabela(){
-    
-    int teste;
-    
-  
-    int i=0;  
-    while(1){
-    
-    int sock,length, n;
-    struct sockaddr_in server;
-    struct sockaddr_in from;
-    struct hostent *hp;
-    int mtu;
-      
-    if(i == 6){
-        
-     sleep(10);
-     i=0;
-    }
-        
-    i++;
-        
-   // pthread_mutex_lock(&env2);
-
-    sock = socket(AF_INET, SOCK_DGRAM,0);
-    
-       
-        
-    if(tem_ligacao(no_inicio,i)){
-    
-        
-        mtu = getMtu(no_inicio,i);
-        
-        
-        
-    if(sock < 0){
-        error("socket");
-        
-    }
-    
-    //Limpa Buffer
-        
-
-        
-    server.sin_family = AF_INET;
-    hp = gethostbyname(nos[i-1].ip); //Localhost
-    
-    if(hp == 0){
-        error("Uknown host");
-        
-    }
-       
-     
-    bcopy((char *)hp->h_addr, (char *)&server.sin_addr,hp->h_length);
-    server.sin_port = htons(nos[data_env.no_envio-1].porta); //5000
-    length=sizeof(struct sockaddr_in);
-    
-    
-    
-    set_garbler(0, 0, 0);
-        
-        printf("\nEnviando::: %s\n");
-    
-    n=sendto_garbled(sock,&tabela_rotas,sizeof(tabela_rotas),0,(struct sockaddr *)&server,length);
-    
-    if(n < 0 ){
-       // error("Sendto_garbled");
-        
-    }
-        
-        
-    printf("Tabela Enviada para i\n");
-        
-    }
-   
-   
-    pthread_mutex_unlock(&env1);
-        
-    }
     
 }
 
 void *recebeTabela(){
     
     
+        recebeTabelaDosNos();
+       
+        //pthread_mutex_lock(&mutex_rede_rede_atualizei1);
+
+        atualizaTabela();
+
+        //pthread_mutex_unlock(&mutex_rede_rede_atualizei2);
+    
 }
 
-void *atualizarTabela(){
+void atualizaTabela(){
     
-    
+   /* int i;
+
+    /* Salva quem enviou para não enviar para esse nó*/
+    /*tabela_rotas[1].quem_enviou = datagram.num_no;
+
+    printf("Recebi tabela de rotas do nó '%d'\n", tabela_rotas[1].quem_enviou);
+
+    for (i = 0; i < 6; i++) {
+
+        /* Se nó destino -1 */
+        /*if (tabela_rotas[i].destino == -1 && datagram.data.tabela_rotas[i].destino != -1)
+        {
+            tabela_rotas[i].destino = datagram.data.tabela_rotas[i].destino;
+            tabela_rotas[i].custo = datagram.data.tabela_rotas[i].custo + 1;
+            tabela_rotas[i].saida = datagram.num_no;
+        }
+
+        /* atualiza custos */
+        /*if (tabela_rotas[i].custo + 1 > datagram.data.tabela_rotas[i].custo) {
+            tabela_rotas[i].custo = datagram.data.tabela_rotas[i].custo + 1;
+            tabela_rotas[i].saida = datagram.num_no;
+        }
+    }*/
     
 }
 
@@ -233,7 +142,7 @@ void criarTabelaDeRotas(){
     
     int i,j;
     
-    printf("\n");
+  printf("\n");
   print_matriz(4,4);
   printf("\n");
   print_mtu(4,4);
@@ -274,7 +183,7 @@ void criarTabelaDeRotas(){
     for(i = 0; i < 6 ; i++){
         
     
-        printf("\n%d",tabela_rotas[i].no_atual);  
+     printf("\n%d",tabela_rotas[i].no_atual);  
      printf("\n%d",tabela_rotas[i].destino);
      printf("\n%d\n",tabela_rotas[i].custo);
     
@@ -282,11 +191,183 @@ void criarTabelaDeRotas(){
 }
 
 
+void enviaTabelaParaOsNosVizinhos(){
+    int teste;
+    
+  
+    int i=0;  
+    while(1){
+    
+    int sock,length, n;
+    struct sockaddr_in server;
+    struct sockaddr_in from;
+    struct hostent *hp;
+    int mtu;
+      
+    if(i == 6){
+        
+     sleep(10);
+     i=0;
+    }
+        
+    i++;
+        
+   // pthread_mutex_lock(&env2);
+
+    sock = socket(AF_INET, SOCK_DGRAM,0);
+    
+       
+        
+    if(tem_ligacao(no_inicio,i)){
+    
+        
+    mtu = getMtu(no_inicio,i);
+        
+        
+        
+    if(sock < 0){
+        error("socket");
+        
+    }
+    
+    //Limpa Buffer
+        
+
+        
+    server.sin_family = AF_INET;
+    hp = gethostbyname(nos[i-1].ip); //Localhost
+    
+    if(hp == 0){
+        error("Uknown host");
+        
+    }
+       
+     
+    bcopy((char *)hp->h_addr, (char *)&server.sin_addr,hp->h_length);
+    server.sin_port = htons(nos[i-1].porta); //5000
+    length=sizeof(struct sockaddr_in);
+    
+    
+    
+    set_garbler(0, 0, 0);
+        
+    printf("\nEnviando: Tabela de Rotas:: %s\n");
+    
+    n=sendto_garbled(sock,&tabela_rotas,sizeof(tabela_rotas),0,(struct sockaddr *)&server,length);
+    
+    if(n < 0 ){
+       // error("Sendto_garbled");
+        
+    }
+        
+        
+    printf("Tabela Enviada para o nó:%d\n",i);
+        
+    }
+   
+   
+    
+        
+    }   
+    
+    
+}
 
 
+void recebeTabelaDosNos(){
+ 
+    
+    
+    int sock,length,fromlen, n;
+    
+    struct tabela_rotas rotas[6];
+    
+    struct sockaddr_in server;
+    struct sockaddr_in from;
+    int i=0;
+    
+    
 
 
+      
+    if(i == 6){
+        
+     sleep(10);
+     i=0;
+    }
+        
+    i++;
+        
+   // pthread_mutex_lock(&env2);
 
+    sock = socket(AF_INET, SOCK_DGRAM,0);
+    
+       
+        
+    if(tem_ligacao(no_inicio,i)){
+        
+        
+    if(sock < 0){
+        error("Opening socket");
+    }
+
+    length = sizeof(server);
+    
+    bzero(&server, length);
+    
+    server.sin_family = AF_INET;
+    server.sin_addr.s_addr = inet_addr(nos[i-1].ip);
+    server.sin_port = htons(nos[i-1].porta);
+    
+    if(bind(sock,(struct sockaddr *)&server,length) < 0){
+        error("binding");
+    }
+    
+    
+    
+    while(1){
+      
+        //Mutex
+        pthread_mutex_lock(&rcv1);
+        fromlen = sizeof(struct sockaddr_in);
+         
+       fprintf(stdout,"\nAguardando tabela de rotas\n");
+       
+        n = recvfrom(sock,&rotas, sizeof(tabela_rotas),0,(struct sockaddr *)&from,&fromlen);
+        
+        if(n < 0){
+         error("recvfrom");   
+        }
+        
+        fprintf(stdout,"\nRecebi tabela de rotas\n");
+        
+        for(i = 0; i < 6 ; i++){
+        
+    
+         printf("\n%d",rotas[i].no_atual);  
+         printf("\n%d",rotas[i].destino);
+         printf("\n%d\n",rotas[i].custo);
+    
+        }
+      
+        
+        
+    }
+    
+    
+    
+}
+
+    
+}
+
+
+void error(char *msg){
+ perror(msg);
+    
+ exit(0);
+    
+}
 
 
 

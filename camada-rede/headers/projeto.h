@@ -64,8 +64,9 @@ struct tabela_rotas tabela_rotas[6];
 
 struct NO nos[6];
 
-void iniciaEnlace(int, char []);
-void iniciaRede();
+void *iniciaEnlace(int, char []);
+void *iniciaRede();
+void *iniciaTransporte();
 
 //Mutex
 
