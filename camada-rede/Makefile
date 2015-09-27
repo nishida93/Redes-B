@@ -12,7 +12,7 @@ frag:
 	gcc -c enlace.c -o enlace.o
 	gcc -c projeto.c -o projeto.o
 	gcc -c garbler.c -o garbler.o
-	gcc transporte.c -o transporte.o
+	gcc -c transporte.c -o transporte.o
 
 gera:
 	gcc projeto.o rede.o enlace.o garbler.o transporte.o -o projeto.exe -lpthread
