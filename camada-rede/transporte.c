@@ -67,7 +67,7 @@ void *prod_Transporte()
     int no=10;
     char *datagrama;
     
-    
+    char aux[100];
     
     printf("Deseja enviar para qual nó?\n");
     scanf("%d", &no); 
@@ -77,10 +77,16 @@ void *prod_Transporte()
     
     
     strcpy(data_env.buffer,"");
-    scanf("%s",data_env.buffer);
-
-    
-    data_env.tam_buffer = strlen(data_env.buffer);
+     fflush(stdout);
+    fpurge(stdin);
+     
+    //scanf("%s",data_env.buffer);
+    fgets(aux, 127, stdin);
+   memcpy(data_env.buffer, aux, strlen(aux)+1);
+        
+        //strcpy(data_env.buffer,aux);
+    data_env.tam_buffer = strlen(data_env.buffer)-1;
+        printf("Tran:: tamanho buffer=%d  %s",data_env.tam_buffer,aux);
     data_env.no_envio = no;
     
     //Chama envia enlace;

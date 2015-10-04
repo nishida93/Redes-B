@@ -14,13 +14,43 @@ void *iniciaRede(){
 
 	//Troca de mensagens ou fila, serve para simular a camada de rede.
 	
-    int te, tr,tet,trt;
-    pthread_t te_rede, tr_rede, te_tabela_rotas,tr_tabela_rotas;
+    int te, tr,tet,trt, trs,tes;
+    pthread_t te_rede, tr_rede, te_tabela_rotas,tr_tabela_rotas,tr_segmento,te_segmento;
 
-    
-    
     criarTabelaDeRotas();
+    
+    
+    trs = pthread_create(&tr_segmento, NULL, recebe_Segmento, NULL);
 
+    if (trs) {
+        printf("ERRO: impossivel criar a thread : receberSegmento\n");
+        exit(-1);
+    }
+    
+    
+    tr = pthread_create(&tr_rede, NULL,recebe_DatagramaRede, NULL);
+
+    if (tr) {
+        printf("ERRO: impossivel criar a thread : receberDatagramas\n");
+        exit(-1);
+    }
+
+    trt = pthread_create(&tr_tabela_rotas, NULL,recebe_Tabela, NULL);
+
+    if (tr) {
+        printf("ERRO: impossivel criar a thread : receberDatagramas\n");
+        exit(-1);
+    }
+    
+    
+    
+    tes = pthread_create(&te_segmento, NULL, envia_Segmento, NULL);
+
+    if (tes) {
+        printf("ERRO: impossivel criar a thread : enviarSegmento\n");
+        exit(-1);
+    }
+    
     te = pthread_create(&te_rede, NULL, envia_DatagramaRede, NULL);
 
     if (te) {
@@ -29,12 +59,7 @@ void *iniciaRede(){
     }
 
     
-    tr = pthread_create(&tr_rede, NULL,recebe_DatagramaRede, NULL);
-
-    if (tr) {
-        printf("ERRO: impossivel criar a thread : receberDatagramas\n");
-        exit(-1);
-    }
+    
     
     tet = pthread_create(&te_tabela_rotas, NULL,envia_Tabela, NULL);
 
@@ -44,12 +69,10 @@ void *iniciaRede(){
     }
 
     
-    trt = pthread_create(&tr_tabela_rotas, NULL,recebe_Tabela, NULL);
+    
 
-    if (tr) {
-        printf("ERRO: impossivel criar a thread : receberDatagramas\n");
-        exit(-1);
-    }
+    
+    
 
     
     //Aguarda o termino das threads
@@ -69,11 +92,11 @@ void *iniciaRede(){
 }
 
 ///Produtor e Consumidor
-void *enviarSegmento() {
-
+void *envia_Segmento() {
+    
     while (1) {
 
-        struct datagrama datagrama_rcv;
+        //struct datagrama datagrama_rcv;
 
         /* Consumir buffer_rede_rede_rcv */
         pthread_mutex_lock(&rede_rcv2);
@@ -94,17 +117,18 @@ void *enviarSegmento() {
     }
 }
 
-void *receberSegmento() {
+void *recebe_Segmento() {
 
     while (1) {
 
         //struct datagrama datagrama_env;
 
         /* Consumir buffer_trans_rede_env */
+        
         pthread_mutex_lock(&trans_rede_env2);
 
         //retirarSegmentoBufferTransRedeEnv(&datagrama_env);
-
+        printf("data_env ::%s",data_env.buffer);
         /* Consumir buffer_trans_rede_env */
         pthread_mutex_unlock(&trans_rede_env1);
 
@@ -123,18 +147,40 @@ void *envia_DatagramaRede()
 {    
     
     
-    
+    while(1){
+        
+    //pthread_mutex_lock(&rede_env2);
+        
+        
+/////teste
+   pthread_mutex_lock(&rede_enlace_env1);
+   // memcpy(&data_env, &buffer_rede_env, sizeof (buffer_rede_env));
+
+        
+        
+     //Incrementa ID do pacote */
+    //datagram->id = id;
+   // id++;
+
+        /* Consumir buffer_rede_rede_env */
+    pthread_mutex_unlock(&rede_env1);    
+        
+        
     pthread_mutex_unlock(&rede_enlace_env1);
 
     //colocarDatagramaBufferRedeEnlaceEnv(datagrama_env);
 
         /* Produzir buffer_rede_enlace_env */
-    
+    //printf("desbloqueando");
     pthread_mutex_unlock(&rede_enlace_env2);//enlace.c -->lock
 
         /* Consome resposta da camada de enlace */
-    pthread_mutex_lock(&rede_enlace_env1);//enlace --> unlock
-    
+    //pthread_mutex_lock(&rede_enlace_env1);//enlace --> unlock
+       
+        
+    pthread_mutex_unlock(&rede_enlace_env1);
+        
+    }
 }
 
 
@@ -198,6 +244,7 @@ void *recebe_DatagramaRede()
            // colocarDatagramaBufferRedeRedeEnv(datagrama_rcv);
 
             /* Produzir buffer_rede_rede_env */
+            
             pthread_mutex_unlock(&rede_env2);
         }
     }
@@ -226,6 +273,48 @@ void *envia_Tabela(){
         
         
     }
+}
+
+
+void enviaTabelaParaOsNosVizinhos(){
+    int teste;
+    int i=0;  
+    int sock,length, n;
+    int mtu;
+      
+   for (i = 0; i < 6; i++) {
+   // pthread_mutex_lock(&env2);
+
+    if(tem_ligacao(no_inicio,i)){
+    
+    pthread_mutex_lock(&rede_env1);   
+    
+    mtu = getMtu(no_inicio,i);
+            
+            memcpy(&(data_env.dados.tabela_rotas), &tabela_rotas, sizeof (tabela_rotas));
+
+            /* Seta variaveis para envio */
+            data_env.no_envio = i;
+            //data_env.num_no = no_inicio;
+
+            printf("Rede : Enviei Tabela de Rotas para o nó '%d'\n", i);
+
+            //colocarDatagramaBufferRedeRedeEnv(*datagram);
+            pthread_mutex_lock(&buffer_rede_env);
+
+            memcpy(&buffer_env, &data_env, sizeof (data_env));
+
+        /* Unlock buffer_rede_env acesso exclusivo */
+            pthread_mutex_unlock(&buffer_rede_env);
+    //Limpa Buffer
+    //server.sin_port = htons(nos[i-1].porta); //5000
+    
+    //printf("Tabela Enviada para o nó:%d\n",i);
+    
+    pthread_mutex_unlock(&rede_env2);
+    
+    }
+   }
 }
 
 void *recebe_Tabela(){
@@ -296,70 +385,7 @@ void atualizaTabela(){
 
 
 
-void enviaTabelaParaOsNosVizinhos(){
-    int teste;
-    
-  
-    int i=0;  
-    
-    
-    
-    int sock,length, n;
-   
-    int mtu;
-      
-   for (i = 0; i < 6; i++) {
-   // pthread_mutex_lock(&env2);
 
-    
-    
-       
-        
-    if(tem_ligacao(no_inicio,i)){
-    
-    pthread_mutex_lock(&rede_env1);   
-    
-    mtu = getMtu(no_inicio,i);
-        
-        
-        
-    
-            memcpy(&(data_env.dados.tabela_rotas), &tabela_rotas, sizeof (tabela_rotas));
-
-            /* Seta variaveis para envio */
-            data_env.no_envio = i;
-            //data_env.num_no = no_inicio;
-
-            printf("Enviei Tabela de Rotas para o nó '%d'\n", i);
-
-            //colocarDatagramaBufferRedeRedeEnv(*datagram);
-    
-        
-            pthread_mutex_lock(&buffer_rede_env);
-
-            memcpy(&buffer_env, &data_env, sizeof (data_env));
-
-        /* Unlock buffer_rede_env acesso exclusivo */
-            pthread_mutex_unlock(&buffer_rede_env);
-    //Limpa Buffer
-       
-     
-    
-    //server.sin_port = htons(nos[i-1].porta); //5000
-
-        
-        
-    printf("Tabela Enviada para o nó:%d\n",i);
-        
-    
-   
-    pthread_mutex_unlock(&rede_env2);
-    
-    }
-   }
-    
-    
-}
 
 
 

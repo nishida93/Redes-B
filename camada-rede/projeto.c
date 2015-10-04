@@ -34,33 +34,141 @@ int main(int argc, char *argv[])
     
     //Inicia os Mutexes
     
-    if (pthread_mutex_init(&rede_env1, NULL) != 0){
+    
+    
+    
+    //Mutexes enlace
+if(pthread_mutex_init(&rede_enlace_env1, NULL) != 0 ){
         printf("\n mutex init failed\n");
         return 1;
+        
     }
-    if (pthread_mutex_init(&rede_env2, NULL) != 0){
+if(pthread_mutex_init(&rede_enlace_env2, NULL) != 0 ){
         printf("\n mutex init failed\n");
         return 1;
+        
     }
-    if (pthread_mutex_init(&rede_rcv1, NULL) != 0){
+if(pthread_mutex_init(&rede_enlace_rcv1, NULL) != 0 ){
         printf("\n mutex init failed\n");
         return 1;
+        
     }
-    if (pthread_mutex_init(&rede_rcv2, NULL) != 0){
+if(pthread_mutex_init(&rede_enlace_rcv2, NULL) != 0 ){
         printf("\n mutex init failed\n");
         return 1;
+        
+    }
+
+
+//Mutexes Redes
+
+if(pthread_mutex_init(&rede_atualiza1, NULL) != 0 ){
+        printf("\n mutex init failed\n");
+        return 1;
+        
+    }
+if(pthread_mutex_init(&rede_atualiza2, NULL) != 0 ){
+        printf("\n mutex init failed\n");
+        return 1;
+        
+    }
+
+if(pthread_mutex_init(&rede_env1, NULL) != 0 ){
+        printf("\n mutex init failed\n");
+        return 1;
+        
+    }
+if(pthread_mutex_init(&rede_env2, NULL) != 0 ){
+        printf("\n mutex init failed\n");
+        return 1;
+        
+    }
+if(pthread_mutex_init(&rede_rcv1, NULL) != 0 ){
+        printf("\n mutex init failed\n");
+        return 1;
+        
+    } 
+if(pthread_mutex_init(&rede_rcv2, NULL) != 0 ){
+        printf("\n mutex init failed\n");
+        return 1;
+        
+    }
+
+if(pthread_mutex_init(&env_tabela1, NULL) != 0 ){
+        printf("\n mutex init failed\n");
+        return 1;
+        
+    }
+if(pthread_mutex_init(&env_tabela2, NULL) != 0 ){
+        printf("\n mutex init failed\n");
+        return 1;
+        
+    }
+if(pthread_mutex_init(&rcv_tabela1, NULL) != 0 ){
+        printf("\n mutex init failed\n");
+        return 1;
+        
+    }
+if(pthread_mutex_init(&rcv_tabela2, NULL) != 0 ){
+        printf("\n mutex init failed\n");
+        return 1;
+        
+    }
+
+
+if(pthread_mutex_init(&trans_rede_env1, NULL) != 0 ){
+        printf("\n mutex init failed\n");
+        return 1;
+        
+    }
+if(pthread_mutex_init(&trans_rede_env2, NULL) != 0 ){
+        printf("\n mutex init failed\n");
+        return 1;
+        
+    }
+if(pthread_mutex_init(&trans_rede_rcv1, NULL) != 0 ){
+        printf("\n mutex init failed\n");
+        return 1;
+        
+    }
+if(pthread_mutex_init(&trans_rede_rcv2, NULL) != 0 ){
+        printf("\n mutex init failed\n");
+        return 1;
+        
+    }
+
+if(pthread_mutex_init(&buffer_rede_env, NULL) != 0 ){
+        printf("\n mutex init failed\n");
+        return 1;
+        
+    }
+if(pthread_mutex_init(&buffer_rede_rcv, NULL) != 0 ){
+        printf("\n mutex init failed\n");
+        return 1;
+        
+    }
+
+//Mutexes buffer
+
+if(pthread_mutex_init(&buffer_rede_env, NULL) != 0 ){
+        printf("\n mutex init failed\n");
+        return 1;
+        
+    }
+if(pthread_mutex_init(&buffer_rede_rcv, NULL) != 0 ){
+        printf("\n mutex init failed\n");
+        return 1;
+        
     }
     
-    if(pthread_mutex_init(&env_tabela1, NULL) != 0){
-        printf("\n mutex init failed\n");
-        return 1;
-        
-    }
-    if(pthread_mutex_init(&env_tabela2, NULL) != 0 ){
-        printf("\n mutex init failed\n");
-        return 1;
-        
-    }
+    pthread_mutex_lock(&rcv_tabela2);
+    pthread_mutex_lock(&rede_atualiza2);
+    pthread_mutex_lock(&rede_enlace_rcv2);
+   // pthread_mutex_lock(&rede_enlace_env2);
+    pthread_mutex_lock(&rede_rcv2);
+    pthread_mutex_lock(&rede_env2);
+    pthread_mutex_lock(&trans_rede_env2);
+    pthread_mutex_lock(&trans_rede_rcv2);
     
 
     data_env.tam_buffer = 0;

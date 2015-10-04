@@ -107,8 +107,8 @@ pthread_mutex_t buffer_rede_rcv;
 
 //Mutexes buffer
 
-extern pthread_mutex_t buffer_rede_env;
-extern pthread_mutex_t buffer_rede_rcv;
+pthread_mutex_t buffer_rede_env;
+pthread_mutex_t buffer_rede_rcv;
 
 
 pthread_mutex_t mutex_rede_rede_receberotas2;

@@ -94,11 +94,16 @@ void *envia_DatagramaRede();
 void *recebe_DatagramaRede();
 void *recebe_Tabela();
 void *envia_Tabela();
+void *recebe_Segmento();
+void *envia_Segmento();
 
 void recebeTabelaDosNos();
 void criarTabelaDeRotas();
 void atualizaTabela();
 void enviaTabelaParaOsNosVizinhos();
+
+
+
 extern void error(char *);
 
 
