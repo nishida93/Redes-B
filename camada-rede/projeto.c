@@ -34,19 +34,19 @@ int main(int argc, char *argv[])
     
     //Inicia os Mutexes
     
-    if (pthread_mutex_init(&env1, NULL) != 0){
+    if (pthread_mutex_init(&rede_env1, NULL) != 0){
         printf("\n mutex init failed\n");
         return 1;
     }
-    if (pthread_mutex_init(&env2, NULL) != 0){
+    if (pthread_mutex_init(&rede_env2, NULL) != 0){
         printf("\n mutex init failed\n");
         return 1;
     }
-    if (pthread_mutex_init(&rcv1, NULL) != 0){
+    if (pthread_mutex_init(&rede_rcv1, NULL) != 0){
         printf("\n mutex init failed\n");
         return 1;
     }
-    if (pthread_mutex_init(&rcv2, NULL) != 0){
+    if (pthread_mutex_init(&rede_rcv2, NULL) != 0){
         printf("\n mutex init failed\n");
         return 1;
     }

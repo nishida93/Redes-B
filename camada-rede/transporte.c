@@ -62,7 +62,7 @@ void *prod_Transporte()
    
     //Mutex
         
-    pthread_mutex_lock(&env1);
+    pthread_mutex_lock(&trans_rede_env1);
         
     int no=10;
     char *datagrama;
@@ -86,7 +86,7 @@ void *prod_Transporte()
     //Chama envia enlace;
     
         
-    pthread_mutex_unlock(&env2);
+    pthread_mutex_unlock(&trans_rede_env2);
     //pthread_mutex_unlock(&env1);
     }
 }
@@ -99,15 +99,16 @@ void *cons_Transporte()
      while (1) {
 
         //Trava mutex de sincronismo
-        pthread_mutex_lock(&rcv2);
+        pthread_mutex_lock(&trans_rede_rcv2);
 
         
 
         if (data_rcv.tam_buffer != 0) {
 
         printf("\n\nTeste-> Tam_buffer: %d Bytes, Buffer: %s\n", data_rcv.tam_buffer, data_rcv.buffer);
-        
-        pthread_mutex_unlock(&rcv1);
+        data_rcv.tam_buffer = 0;
+        data_rcv.no_envio = 0;
+        pthread_mutex_unlock(&trans_rede_rcv1);
 
        }
        

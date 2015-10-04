@@ -26,12 +26,19 @@ struct tabela_rotas{
 
 };
 
+union tabela 
+{ 
+    struct tabela_rotas tabela_rotas[6];
+ };
+
+
 struct datagrama {
     
     int tam_buffer;
     int  no_envio;
     char buffer[100];
     int checksum;
+    union tabela dados;
 };
 
 //Struct No -- Armazena as informações dos nos
@@ -58,9 +65,8 @@ struct getInfo{
 
 
 extern struct datagrama data_env, data_rcv;
+extern struct datagrama buffer_env, buffer_rcv;
 extern struct getInfo info;
-pthread_mutex_t env1, env2;
-pthread_mutex_t rcv1, rcv2;
 
 
 
@@ -102,6 +108,50 @@ void *recebe(void *);
 
 int recebeEnlace();
 int enviaEnlace();
+
+
+void error(char *);
+
+
+
+
+//Mutexes enlace
+extern pthread_mutex_t rede_enlace_env1;
+extern pthread_mutex_t rede_enlace_env2;
+extern pthread_mutex_t rede_enlace_rcv1;
+extern pthread_mutex_t rede_enlace_rcv2;
+
+
+//Mutexes Redes
+
+extern pthread_mutex_t rede_atualiza1;
+extern pthread_mutex_t rede_atualiza2;
+
+extern pthread_mutex_t rede_env1;
+extern pthread_mutex_t rede_env2;
+extern pthread_mutex_t rede_rcv1; 
+extern pthread_mutex_t rede_rcv2;
+
+extern pthread_mutex_t env_tabela1;
+extern pthread_mutex_t env_tabela2;
+extern pthread_mutex_t rcv_tabela1;
+extern pthread_mutex_t rcv_tabela2;
+
+
+extern pthread_mutex_t trans_rede_env1;
+extern pthread_mutex_t trans_rede_env2;
+extern pthread_mutex_t trans_rede_rcv1;
+extern pthread_mutex_t trans_rede_rcv2;
+
+
+extern pthread_mutex_t buffer_rede_env;
+extern pthread_mutex_t buffer_rede_rcv;
+
+
+//Mutexes Buffer
+
+extern pthread_mutex_t buffer_rede_env;
+extern pthread_mutex_t buffer_rede_rcv;
 
 /*
 
