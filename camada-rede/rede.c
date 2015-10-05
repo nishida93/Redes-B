@@ -424,7 +424,7 @@ void criarTabelaDeRotas(){
     }
     
     if(!tem_ligacao(no_inicio,i+1)){   
-        printf("\nI + 1 = %d ", i+1);
+        //printf("\nI + 1 = %d ", i+1);
         tabela_rotas[i].destino = -1; 
         tabela_rotas[i].custo = -1;
     }
@@ -443,9 +443,9 @@ void criarTabelaDeRotas(){
     for(i = 0; i < 6 ; i++){
         
     
-     printf("\n%d",tabela_rotas[i].no_atual);  
-     printf("\n%d",tabela_rotas[i].destino);
-     printf("\n%d\n",tabela_rotas[i].custo);
+     //printf("\n%d",tabela_rotas[i].no_atual);  
+     //printf("\n%d",tabela_rotas[i].destino);
+     //printf("\n%d\n",tabela_rotas[i].custo);
     
     }
 }

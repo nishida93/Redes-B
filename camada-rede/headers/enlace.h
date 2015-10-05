@@ -104,8 +104,8 @@ extern struct tabela_rotas tabela_rotas[6];
 extern struct NO nos[6];
 //Threads
 
-void *envia(void *);
-void *recebe(void *);
+void *envia_Datagrama(void *);
+void *recebe_Datagrama(void *);
 
 int recebeEnlace();
 int enviaEnlace();

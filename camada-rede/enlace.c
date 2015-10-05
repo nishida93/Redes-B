@@ -102,7 +102,7 @@ int *iniciaEnlace(){
         
   
 
-      return 0;  
+        
 }
 
 
@@ -130,7 +130,33 @@ int *iniciaEnlace(){
     
   
   
-  iniciaThreads();
+  
+    
+    pthread_t t1;
+    
+    int a1 = 1;
+
+    
+    
+    //Recebe
+    
+    
+    pthread_create(&t1, NULL, recebe_Datagrama, (void *)(&a1));
+    
+    pthread_t t2;
+    
+    int a2 = 2;
+    //Envia
+    pthread_create(&t2, NULL, envia_Datagrama, (void *)(&a2));
+    
+    
+
+    
+    
+    pthread_join(t1, NULL);
+    pthread_join(t2, NULL);
+    
+    return 0;
  
 }
 
@@ -159,7 +185,7 @@ void *recebe_Datagrama(void *thread)
     char buf[1024];
     char aux[1024];
    
-    
+    printf("\nrecebe_Datagrama:");
     sock=socket(AF_INET, SOCK_DGRAM,0);
     
     if(sock < 0){
@@ -183,7 +209,7 @@ void *recebe_Datagrama(void *thread)
     while(1){
       
         //Mutex
-        pthread_mutex_lock(&rede_enlace_rcv1);
+        //pthread_mutex_lock(&rede_enlace_rcv1);
         fromlen = sizeof(struct sockaddr_in);
          
         //printf("\nSize:%d\n",sizeof(data_rcv));
@@ -288,7 +314,7 @@ void *recebe_Datagrama(void *thread)
    
         
         
-        pthread_mutex_unlock(&rede_enlace_rcv2);
+        //pthread_mutex_unlock(&rede_enlace_rcv2);
         
     }
     
@@ -304,7 +330,7 @@ void *envia_Datagrama(void *thread){
     int nos_para_envio = 0; 
     int aux_nos=0;
     int teste;
-    
+     int mtu=0;
     
     int sock,length, n;
     struct sockaddr_in server;
@@ -313,11 +339,11 @@ void *envia_Datagrama(void *thread){
     //printf("\n%d ::: %s\n",data_env->no, data_env->data);
     while(1){
     
-    
-     pthread_mutex_lock(&rede_enlace_env2);//rede.c -->unlock
+     
+     //pthread_mutex_lock(&rede_enlace_env2);//rede.c -->unlock
         
         
-    int mtu=0;
+   
     if(nos_para_envio >= 6){
         
      nos_para_envio=0;   
@@ -348,20 +374,18 @@ void *envia_Datagrama(void *thread){
     
     //Limpa Buffer
         
-    strcpy(buffer,"");
+    
         
     server.sin_family = AF_INET;
         
     int r = tem_ligacao(no_do_enlace,data_env.no_envio);
-    if(data_env.no_envio != -1 &&  r == 1){
+    if(data_env.no_envio != 0 &&  r == 1){
     
         aux_nos=nos_para_envio;
         nos_para_envio = data_env.no_envio;
         
         
-        
-        bzero(buffer, 1024);
-    fgets(buffer,1024,stdin);
+   
     
     
     strcpy(buffer,data_env.buffer);    
@@ -416,10 +440,10 @@ void *envia_Datagrama(void *thread){
     sleep(5);
     set_garbler(0, 0, 0);
         
-        
+       
     fpurge(stdin);
     fpurge(stdout);
-    printf("enlace data_env:%s",data_env.buffer);
+    
     n=sendto_garbled(sock,&data_env,sizeof(data_env),0,(struct sockaddr *)&server,length);
     
     if(n < 0 ){
@@ -454,9 +478,11 @@ void *envia_Datagrama(void *thread){
         
     }
    
-    pthread_mutex_unlock(&rede_enlace_env1);
+   // pthread_mutex_unlock(&rede_enlace_env1);
       
     //}
+        
+        
  }//Fecha While
 }
 
@@ -465,29 +491,7 @@ void *envia_Datagrama(void *thread){
 
 int iniciaThreads(){
 
-    pthread_t t1;
     
-    int a1 = 1;
-
-    
-    
-    //Recebe
-    
-    
-    pthread_create(&t1, NULL, recebe_Datagrama, (void *)(&a1));
-    
-    pthread_t t2;
-    
-    int a2 = 2;
-    //Envia
-    pthread_create(&t2, NULL, envia_Datagrama, (void *)(&a2));
-    
-    
-
-    
-    
-    pthread_join(t1, NULL);
-    pthread_join(t2, NULL);
     return 0;   
 }
 
