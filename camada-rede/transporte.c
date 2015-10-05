@@ -57,12 +57,12 @@ int *iniciaTransporte(){
 void *prod_Transporte()
 {    
     
-    
+    char buffer_aux[120];
     while (1) {
    
     //Mutex
         
-    pthread_mutex_lock(&trans_rede_env1);
+    
         
     int no=10;
     char *datagrama;
@@ -80,15 +80,20 @@ void *prod_Transporte()
      fflush(stdout);
     fpurge(stdin);
      
-    //scanf("%s",data_env.buffer);
-    fgets(aux, 127, stdin);
-   memcpy(data_env.buffer, aux, strlen(aux)+1);
+    fgets(buffer_aux, 99, stdin);
+    buffer_aux[strlen(buffer_aux) - 1] = '\0';
+    //fgets(aux, 127, stdin);
+    //memcpy(data_env.buffer, aux, strlen(aux)+1);
         
         //strcpy(data_env.buffer,aux);
-    data_env.tam_buffer = strlen(data_env.buffer)-1;
-        printf("Tran:: tamanho buffer=%d  %s",data_env.tam_buffer,aux);
-    data_env.no_envio = no;
-    
+        
+    pthread_mutex_lock(&trans_rede_env1);    
+        
+    buffer_rede_trans_env.tam_buffer = strlen(buffer_rede_trans_env.buffer)-1;
+        //printf("Tran:: tamanho buffer=%d",data_env.tam_buffer);
+    buffer_rede_trans_env.no_envio = no;
+        
+    memcpy(&buffer_rede_trans_env.buffer, &buffer_aux, sizeof (buffer_aux));
     //Chama envia enlace;
     
         

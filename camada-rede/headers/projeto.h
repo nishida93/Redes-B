@@ -54,7 +54,8 @@ struct getInfo{
 
 
 struct datagrama data_env, data_rcv;
-struct datagrama buffer_env, buffer_rcv;
+struct datagrama buffer_env,buffer_rcv,buffer_rede_trans_env,buffer_rede_trans_rcv;
+struct datagrama buffer_rede_enlace_env,buffer_rede_enlace_rcv;
 struct getInfo info;
 
 
@@ -70,7 +71,7 @@ struct tabela_rotas tabela_rotas[6];
 
 struct NO nos[6];
 
-void *iniciaEnlace(int, char []);
+void *iniciaEnlace();
 void *iniciaRede();
 void *iniciaTransporte();
 

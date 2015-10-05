@@ -26,7 +26,7 @@ int checksum;
 
 int no_do_enlace; // Numero do nó iniciado;
 
-void *iniciaEnlace(){
+int *iniciaEnlace(){
 
   no_do_enlace = info.no_de_inicio;
  
@@ -102,7 +102,7 @@ void *iniciaEnlace(){
         
   
 
-        
+      return 0;  
 }
 
 
@@ -187,7 +187,7 @@ void *recebe_Datagrama(void *thread)
         fromlen = sizeof(struct sockaddr_in);
          
         //printf("\nSize:%d\n",sizeof(data_rcv));
-       
+        
         n = recvfrom(sock,&data_rcv, sizeof(data_rcv),0,(struct sockaddr *)&from,&fromlen);
         
         if(n < 0){
@@ -198,7 +198,7 @@ void *recebe_Datagrama(void *thread)
         
        // write(1,"Datagrama Recebido: ",20);
         //se nao for pra mim -> repasso
-        if(data_rcv.dados.tabela_rotas[data_rcv.no_envio-1].destino != no_inicio){
+       /* if(data_rcv.dados.tabela_rotas[data_rcv.no_envio-1].destino != no_inicio){
             
             if(tem_ligacao(no_inicio,data_rcv.dados.tabela_rotas[data_rcv.no_envio-1].destino)){
                 sock = socket(AF_INET, SOCK_DGRAM,0);
@@ -217,8 +217,9 @@ void *recebe_Datagrama(void *thread)
                 
                 set_garbler(0, 0, 0);
         
-        
-    
+                fpurge(stdout);
+                
+                fpurge(stdout);
                 n=sendto_garbled(sock,&data_env,sizeof(data_env),0,(struct sockaddr *)&server,length);
     
                 if(n < 0 ){
@@ -231,7 +232,7 @@ void *recebe_Datagrama(void *thread)
             //fprintf(stdout,"nao foi possivel repassar");
                 
                 
-            }
+            }*/
         }
         
         //write(1, data_rcv.buffer, n);
@@ -293,7 +294,7 @@ void *recebe_Datagrama(void *thread)
     
  
    
-}
+
 
 //Envia Datagrama
 void *envia_Datagrama(void *thread){
@@ -304,14 +305,18 @@ void *envia_Datagrama(void *thread){
     int aux_nos=0;
     int teste;
     
-    //printf("\n%d ::: %s\n",data_env->no, data_env->data);
-    while(1){
     
     int sock,length, n;
     struct sockaddr_in server;
     struct sockaddr_in from;
     struct hostent *hp;
+    //printf("\n%d ::: %s\n",data_env->no, data_env->data);
+    while(1){
     
+    
+     pthread_mutex_lock(&rede_enlace_env2);//rede.c -->unlock
+        
+        
     int mtu=0;
     if(nos_para_envio >= 6){
         
@@ -322,7 +327,7 @@ void *envia_Datagrama(void *thread){
     char buffer[1024];
     char check_aux[1024];
         
-    pthread_mutex_lock(&rede_enlace_env2);//rede.c -->unlock
+   
 
     sock = socket(AF_INET, SOCK_DGRAM,0);
     
@@ -408,13 +413,13 @@ void *envia_Datagrama(void *thread){
     printf("sizeof:%lu\n",sizeof(data_env));*/
            
            
-    sleep(10);
+    sleep(5);
     set_garbler(0, 0, 0);
         
         
     fpurge(stdin);
-     fpurge(stdout);
-    
+    fpurge(stdout);
+    printf("enlace data_env:%s",data_env.buffer);
     n=sendto_garbled(sock,&data_env,sizeof(data_env),0,(struct sockaddr *)&server,length);
     
     if(n < 0 ){
@@ -450,7 +455,7 @@ void *envia_Datagrama(void *thread){
     }
    
     pthread_mutex_unlock(&rede_enlace_env1);
-    pthread_mutex_unlock(&rede_enlace_env2);   
+      
     //}
  }//Fecha While
 }

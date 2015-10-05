@@ -164,7 +164,7 @@ if(pthread_mutex_init(&buffer_rede_rcv, NULL) != 0 ){
     pthread_mutex_lock(&rcv_tabela2);
     pthread_mutex_lock(&rede_atualiza2);
     pthread_mutex_lock(&rede_enlace_rcv2);
-   // pthread_mutex_lock(&rede_enlace_env2);
+    pthread_mutex_lock(&rede_enlace_env2);
     pthread_mutex_lock(&rede_rcv2);
     pthread_mutex_lock(&rede_env2);
     pthread_mutex_lock(&trans_rede_env2);

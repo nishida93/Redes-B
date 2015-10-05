@@ -82,7 +82,8 @@ extern int no_inicio;
 extern struct tabela_rotas tabela_rotas[6];
 
 extern struct datagrama data_env, data_rcv;
-extern struct datagrama buffer_env, buffer_rcv;
+extern struct datagrama buffer_env,buffer_rcv,buffer_rede_trans_env,buffer_rede_trans_rcv;
+extern struct datagrama buffer_rede_enlace_env,buffer_rede_enlace_rcv;
 extern struct getInfo info;
 
 extern pthread_mutex_t buffer_rede_env;

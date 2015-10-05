@@ -65,7 +65,8 @@ struct getInfo{
 
 
 extern struct datagrama data_env, data_rcv;
-extern struct datagrama buffer_env, buffer_rcv;
+extern struct datagrama buffer_env,buffer_rcv,buffer_rede_trans_env,buffer_rede_trans_rcv;
+extern struct datagrama buffer_rede_enlace_env,buffer_rede_enlace_rcv;
 extern struct getInfo info;
 
 

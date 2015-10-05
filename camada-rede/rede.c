@@ -91,6 +91,31 @@ void *iniciaRede(){
 
 }
 
+void *recebe_Segmento() {
+
+    while (1) {
+
+        //struct datagrama datagrama_env;
+
+        /* Consumir buffer_trans_rede_env */
+       
+        pthread_mutex_lock(&trans_rede_env2);
+
+        //retirarSegmentoBufferTransRedeEnv(&datagrama_env);
+        //printf("data_env ::%s",data_env.buffer);
+        /* Consumir buffer_trans_rede_env */
+        pthread_mutex_unlock(&trans_rede_env1);
+
+        /* Produzir buffer_rede_rede_env */
+        pthread_mutex_lock(&rede_env1);
+
+      //  colocarDatagramaBufferRedeRedeEnv(datagrama_env);
+
+        /* Produzir buffer_rede_rede_env */
+        pthread_mutex_unlock(&rede_env2);
+    }
+}
+
 ///Produtor e Consumidor
 void *envia_Segmento() {
     
@@ -117,30 +142,6 @@ void *envia_Segmento() {
     }
 }
 
-void *recebe_Segmento() {
-
-    while (1) {
-
-        //struct datagrama datagrama_env;
-
-        /* Consumir buffer_trans_rede_env */
-        
-        pthread_mutex_lock(&trans_rede_env2);
-
-        //retirarSegmentoBufferTransRedeEnv(&datagrama_env);
-        printf("data_env ::%s",data_env.buffer);
-        /* Consumir buffer_trans_rede_env */
-        pthread_mutex_unlock(&trans_rede_env1);
-
-        /* Produzir buffer_rede_rede_env */
-        pthread_mutex_lock(&rede_env1);
-
-        //colocarDatagramaBufferRedeRedeEnv(datagrama_env);
-
-        /* Produzir buffer_rede_rede_env */
-        pthread_mutex_unlock(&rede_env2);
-    }
-}
 
 //Envia Datagrama
 void *envia_DatagramaRede()
@@ -153,16 +154,10 @@ void *envia_DatagramaRede()
         
         
 /////teste
-   pthread_mutex_lock(&rede_enlace_env1);
-   // memcpy(&data_env, &buffer_rede_env, sizeof (buffer_rede_env));
-
+    pthread_mutex_lock(&rede_env2);
+    
+      //  retira
         
-        
-     //Incrementa ID do pacote */
-    //datagram->id = id;
-   // id++;
-
-        /* Consumir buffer_rede_rede_env */
     pthread_mutex_unlock(&rede_env1);    
         
         
@@ -176,7 +171,10 @@ void *envia_DatagramaRede()
 
         /* Consome resposta da camada de enlace */
     //pthread_mutex_lock(&rede_enlace_env1);//enlace --> unlock
-       
+      
+    pthread_mutex_lock(&rede_enlace_env1);
+        
+        //retorno enlace
         
     pthread_mutex_unlock(&rede_enlace_env1);
         
