@@ -19,7 +19,7 @@
 #include <pthread.h>
 #include <netdb.h>
 
-struct tabela_rotas{
+struct tabela_de_rotas{
     int no_atual;
     int destino;
     int custo;
@@ -35,7 +35,7 @@ struct NO{
 
 union tabela 
 { 
-    struct tabela_rotas tabela_rotas[6];
+    struct tabela_de_rotas tabela_rotas[6];
  };
 
 
@@ -45,8 +45,22 @@ struct datagrama {
     int  no_envio;
     char buffer[100];
     int checksum;
+    int controle;
+    int offset;
+    int id;
+    int no_vizinho;
+    int no_inicio;
+    int no_prox;
+    int frag;
     union tabela dados;
 };
+
+
+
+
+
+
+
 struct getInfo{
     int no_de_inicio;
     char arg[100];
@@ -66,14 +80,23 @@ int matriz[10][10];
 int mtu[10][10];
 
 int no_inicio;
-
-struct tabela_rotas tabela_rotas[6];
+int retorno_rede; // para camada rede
+struct tabela_de_rotas tabela_rotas[6];
 
 struct NO nos[6];
 
 void *iniciaEnlace();
 void *iniciaRede();
 void *iniciaTransporte();
+
+
+//Mutex Controle Externo
+pthread_mutex_t controle_tabela;
+pthread_mutex_t controle_rede_rcv;
+pthread_mutex_t controle_rede_env;
+pthread_mutex_t controle_randomico;
+pthread_mutex_t controle_rede_enlace_env;
+pthread_mutex_t controle_rede_enlace_rcv;
 
 //Mutexes enlace
 pthread_mutex_t rede_enlace_env1;

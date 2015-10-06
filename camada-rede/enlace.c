@@ -25,6 +25,7 @@ int checkSum(void *);
 int checksum; 
 
 int no_do_enlace; // Numero do nó iniciado;
+int retorno_enlace;
 
 int *iniciaEnlace(){
 
@@ -182,9 +183,15 @@ void *recebe_Datagrama(void *thread)
     struct sockaddr_in from;
     struct hostent *hp;
  
+    int i;
     char buf[1024];
     char aux[1024];
    
+    while(1){
+        
+        
+        
+    
     printf("\nrecebe_Datagrama:");
     sock=socket(AF_INET, SOCK_DGRAM,0);
     
@@ -197,16 +204,16 @@ void *recebe_Datagrama(void *thread)
     bzero(&server, length);
     
     server.sin_family = AF_INET;
-    server.sin_addr.s_addr = inet_addr(nos[no_do_enlace-1].ip);
-    server.sin_port = htons(nos[no_do_enlace-1].porta);
-    //printf("PORTA ::::: %d",nos[no_do_enlace-1].porta);
+    server.sin_addr.s_addr = inet_addr(nos[no_inicio-1].ip);
+    server.sin_port = htons(nos[no_inicio-1].porta);
+    //printf("PORTA ::::: %d",nos[no_inicio-1].porta);
     if(bind(sock,(struct sockaddr *)&server,length) < 0){
-        error("binding");
+        error("binding recebe datagrama");
     }
     
     
     
-    while(1){
+    
       
         //Mutex
         //pthread_mutex_lock(&rede_enlace_rcv1);
@@ -222,70 +229,10 @@ void *recebe_Datagrama(void *thread)
         
         
         
-       // write(1,"Datagrama Recebido: ",20);
-        //se nao for pra mim -> repasso
-       /* if(data_rcv.dados.tabela_rotas[data_rcv.no_envio-1].destino != no_inicio){
-            
-            if(tem_ligacao(no_inicio,data_rcv.dados.tabela_rotas[data_rcv.no_envio-1].destino)){
-                sock = socket(AF_INET, SOCK_DGRAM,0);
-    
-
-                    if(sock < 0){
-                        error("socket");
-
-                    }
-                
-                server.sin_family = AF_INET;
-                hp = gethostbyname(nos[data_rcv.dados.tabela_rotas[data_rcv.no_envio-1].destino-1].ip);  
-                bcopy((char *)hp->h_addr, (char *)&server.sin_addr,hp->h_length);
-                server.sin_port = htons(nos[data_rcv.dados.tabela_rotas[data_rcv.no_envio-1].destino-1].porta); //5000
-                length=sizeof(struct sockaddr_in);
-                
-                set_garbler(0, 0, 0);
-        
-                fpurge(stdout);
-                
-                fpurge(stdout);
-                n=sendto_garbled(sock,&data_env,sizeof(data_env),0,(struct sockaddr *)&server,length);
-    
-                if(n < 0 ){
-                    error("Sendto_garbled");
-
-                }
-                
-            }
-            else{
-            //fprintf(stdout,"nao foi possivel repassar");
-                
-                
-            }*/
-        }
-        
-        //write(1, data_rcv.buffer, n);
-        
-        //printf("DATA: %s\n\n", data_rcv.buffer);
-        
-       /* n = recvfrom(sock,aux,1024,0,(struct sockaddr *)&from,&fromlen);
-        
-        if(n < 0){
-         error("recvfrom");   
-        }*/
-        
-        
-        //printf("DATA 2: %d\n\n", data_rcv.tam_buffer);
-        //printf("DATA 2: %d\n\n", data_rcv.checksum);
-        //int  no_envio;
-        //checksum = atoi(aux);
+       
         
         
         
-        
-       // strcpy(data_rcv.buffer,"");
-        //strcpy(data_rcv.buffer,buf);///<---------------------------Atribui valores para a struct de recebimento
-       // data_rcv.tam_buffer = strlen(buf);
-        //data_rcv.no_envio = no_do_enlace;
-        
-        ///printf("DATA 3: %d\n\n", data_rcv.no_envio);
         //RECALCULA CHECKSUM
         int checksum2 = data_rcv.checksum;
         
@@ -294,6 +241,7 @@ void *recebe_Datagrama(void *thread)
         printf("\nBuffer:%s",data_rcv.buffer);
         printf("\nChecksum:%d\n",data_rcv.checksum);
         printf("\nChecksum:%lu\n",sizeof(data_rcv));*/
+    
         int check = checkSum(&data_rcv.buffer);
 
         //printf("\nCheck %d:::::%d::::::%d",check, data_rcv.checksum, checksum2);
@@ -315,8 +263,24 @@ void *recebe_Datagrama(void *thread)
         
         
         //pthread_mutex_unlock(&rede_enlace_rcv2);
-        
+    
+        //pthread_mutex_lock(&mutex_enlc_rd_prod);
+        pthread_mutex_lock(&rede_enlace_env2);
+        //Fecha produtor Enlace->Rede
+		buffer_rede_enlace_rcv.no_inicio = data_rcv.no_inicio;
+		buffer_rede_enlace_rcv.no_envio = data_rcv.no_envio;
+		buffer_rede_enlace_rcv.tam_buffer = data_rcv.tam_buffer;
+		buffer_rede_enlace_rcv.id = data_rcv.id;
+		buffer_rede_enlace_rcv.controle = data_rcv.controle;
+		buffer_rede_enlace_rcv.no_vizinho = data_rcv.no_vizinho;
+		buffer_rede_enlace_rcv.no_prox = data_rcv.no_prox;
+		buffer_rede_enlace_rcv.offset = data_rcv.offset;
+		buffer_rede_enlace_rcv.frag = data_rcv.frag;
+		memcpy(&buffer_rede_enlace_rcv.dados, &data_rcv.dados, data_rcv.frag);
+		//pthread_mutex_unlock(&mutex_enlc_rd_cons);
+        pthread_mutex_lock(&rede_enlace_rcv2);//Abre consumidor Enlace->Rede
     }
+}
     
  
    
@@ -326,7 +290,7 @@ void *recebe_Datagrama(void *thread)
 void *envia_Datagrama(void *thread){
     int id=*(int *)thread;
  
-
+    int i;
     int nos_para_envio = 0; 
     int aux_nos=0;
     int teste;
@@ -342,27 +306,47 @@ void *envia_Datagrama(void *thread){
      
      //pthread_mutex_lock(&rede_enlace_env2);//rede.c -->unlock
         
+     //pthread_mutex_lock(&mutex_rd_enlc_cons);
+        pthread_mutex_lock(&rede_enlace_rcv1);//Fecha consumidor Rede->Enlace
+        printf("Entrei");
         
-   
-    if(nos_para_envio >= 6){
+		data_env.no_inicio = buffer_rede_enlace_env.no_inicio;
+		data_env.no_envio = buffer_rede_enlace_env.no_envio;
+		data_env.tam_buffer = buffer_rede_enlace_env.tam_buffer;
+		data_env.id = buffer_rede_enlace_env.id;
+		data_env.controle = buffer_rede_enlace_env.controle;
+		data_env.no_vizinho = buffer_rede_enlace_env.no_envio;
+		data_env.no_prox = buffer_rede_enlace_env.no_prox;
+		data_env.offset = buffer_rede_enlace_env.offset;
+		data_env.frag = buffer_rede_enlace_env.frag;
+		memcpy(&data_rcv.dados, &buffer_rede_enlace_env.dados, buffer_rede_enlace_env.frag);
+		//pthread_mutex_unlock(&mutex_rd_enlc_prod);    
+        pthread_mutex_unlock(&rede_enlace_env1);    
+            
+        printf("\npassei");
         
-     nos_para_envio=0;   
-    }
-      nos_para_envio++;  
+        for(i=1; i <6; i++)
+		{
+			if(nos[i-1].no == data_env.no_prox) 
+                break;
+		} //j sairá com o indice do próximo nó    
+          printf(" \nI DO ENLACE::%d %d",i,data_env.no_prox);
+        
+    
     
     char buffer[1024];
     char check_aux[1024];
-        
    
 
     sock = socket(AF_INET, SOCK_DGRAM,0);
     
     //if(data_env.tam_buffer != 0){    
-        
-    if(tem_ligacao(no_do_enlace,nos_para_envio)){
+      printf(" \nI DO ENLACE22222::%d  %d %d",no_do_enlace, i,tem_ligacao(no_do_enlace,i));
+    if(tem_ligacao(no_do_enlace,i)){
+        printf(" \nI DO ENLACE22222::%d",tem_ligacao(no_do_enlace,i));
      //fprintf(stdout,"\nEnlace Envia:::Enviando tabela de Rotas para o no:%d\n",nos_para_envio);
         
-        mtu = getMtu(no_do_enlace,nos_para_envio);
+     //   mtu = getMtu(no_do_enlace,nos_para_envio);
         
         //printf("ENVIA::::IP:::::%s PORTA::::%d",nos[data_env.no_envio-1].ip,nos[data_env.no_envio-1].porta);
         //printf("Mtu:::%d\n\n",mtu);
@@ -379,16 +363,13 @@ void *envia_Datagrama(void *thread){
     server.sin_family = AF_INET;
         
     int r = tem_ligacao(no_do_enlace,data_env.no_envio);
-    if(data_env.no_envio != 0 &&  r == 1){
     
-        aux_nos=nos_para_envio;
-        nos_para_envio = data_env.no_envio;
         
         
    
     
     
-    strcpy(buffer,data_env.buffer);    
+   // strcpy(buffer,data_env.buffer);    
     
     //TESTA MTU
     
@@ -403,17 +384,17 @@ void *envia_Datagrama(void *thread){
     data_env.tam_buffer = strlen(data_env.buffer);
         
     
-    checksum = checkSum(4);
+    //checksum = checkSum(4);
     //printf("check::: %d\n\n",checksum);
         
 
-    sprintf(check_aux,"%d",checksum);   
+    //sprintf(check_aux,"%d",checksum);   
     
-    data_env.checksum = checksum;
-    }
+    data_env.checksum = 10;
+    
 
-    hp = gethostbyname(nos[nos_para_envio-1].ip);  
-        mtu = getMtu(no_do_enlace,data_env.no_envio);
+    hp = gethostbyname(nos[data_env.no_envio-1].ip);  
+        //mtu = getMtu(no_do_enlace,data_env.no_envio);
     
     if(hp == 0){
         error("Uknown host");
@@ -422,7 +403,8 @@ void *envia_Datagrama(void *thread){
        
      
     bcopy((char *)hp->h_addr, (char *)&server.sin_addr,hp->h_length);
-    server.sin_port = htons(nos[nos_para_envio-1].porta); //5000
+    server.sin_port = htons(nos[data_env.no_envio-1].porta); //5000
+    printf("\nPorta%d",nos[data_env.no_envio-1].porta);
     length=sizeof(struct sockaddr_in);
     
     
@@ -437,13 +419,12 @@ void *envia_Datagrama(void *thread){
     printf("sizeof:%lu\n",sizeof(data_env));*/
            
            
-    sleep(5);
+    //sleep(5);
     set_garbler(0, 0, 0);
         
        
-    fpurge(stdin);
-    fpurge(stdout);
     
+    printf("\nEnviandoEnviandoEnviandoEnviandoEnviandoEnviandoEnviandoEnviandoEnviandoEnviandoEnviandoEnviando\n");
     n=sendto_garbled(sock,&data_env,sizeof(data_env),0,(struct sockaddr *)&server,length);
     
     if(n < 0 ){

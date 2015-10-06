@@ -19,16 +19,23 @@
 #include <pthread.h>
 #include <netdb.h>
 
-struct tabela_rotas{
+struct tabela_de_rotas{
     int no_atual;
     int destino;
     int custo;
-
+    
 };
+
+struct NO{
+    int no;
+    int porta;
+    char ip[100];
+};
+
 
 union tabela 
 { 
-    struct tabela_rotas tabela_rotas[6];
+    struct tabela_de_rotas tabela_rotas[6];
  };
 
 
@@ -38,20 +45,23 @@ struct datagrama {
     int  no_envio;
     char buffer[100];
     int checksum;
+    int controle;
+    int offset;
+    int id;
+    int no_vizinho;
+    int no_inicio;
+    int no_prox;
+    int frag;
     union tabela dados;
 };
+
 
 //Struct No -- Armazena as informações dos nos
 
 //nos[0] guarda as informacoes do no 1.
 //nos[1] guarda as informacoes do no 2.
 //etc..
-struct NO{
-    int no;
-    int porta;
-    char ip[100];
-    
-};
+
 
 
 struct getInfo{
@@ -98,7 +108,7 @@ extern int mtu[10][10];
 
 extern int no_inicio;
 
-extern struct tabela_rotas tabela_rotas[6];
+extern struct tabela_de_rotas tabela_rotas[6];
 
 
 extern struct NO nos[6];
@@ -114,7 +124,13 @@ int enviaEnlace();
 void error(char *);
 
 
-
+//Mutex Controle Externo
+extern pthread_mutex_t controle_tabela;
+extern pthread_mutex_t controle_rede_rcv;
+extern pthread_mutex_t controle_rede_env;
+extern pthread_mutex_t controle_randomico;
+extern pthread_mutex_t controle_rede_enlace_env;
+extern pthread_mutex_t controle_rede_enlace_rcv;
 
 //Mutexes enlace
 extern pthread_mutex_t rede_enlace_env1;

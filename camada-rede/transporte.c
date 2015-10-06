@@ -57,7 +57,11 @@ int *iniciaTransporte(){
 void *prod_Transporte()
 {    
     
-    char buffer_aux[120];
+    
+    int retorno_trans;
+	struct datagrama aux;
+	aux.no_inicio = no_inicio;
+    
     while (1) {
    
     //Mutex
@@ -67,38 +71,37 @@ void *prod_Transporte()
     int no=10;
     char *datagrama;
     
-    char aux[100];
+    
     
     printf("Deseja enviar para qual nó?\n");
-    scanf("%d", &no); 
+    scanf("%d", &aux.no_envio); 
     
     printf("Escreva uma mensagem para enviar:\n");
-  
+    scanf("%s",aux.buffer);
+    
+        aux.tam_buffer = strlen(aux.buffer);
+        //pthread_mutex_lock(&mutex_trns_rd_prod);	//Fecha produtor Transporte->Rede
+		pthread_mutex_lock(&trans_rede_env2);	//Fecha produtor Transporte->Rede
+        
+		buffer_rede_trans_env.no_inicio = aux.no_inicio;
+		buffer_rede_trans_env.no_envio = aux.no_envio;
+		buffer_rede_trans_env.tam_buffer = aux.tam_buffer;
+		memcpy(buffer_rede_trans_env.buffer, aux.buffer, aux.tam_buffer);
+        
+		//pthread_mutex_unlock(&mutex_trns_rd_cons);
+        pthread_mutex_unlock(&trans_rede_rcv2);//Abre consumidor Transporte->Rede
+		//verificar retorno
+		//pthread_mutex_lock(&mutex_retorno_rede_cons);
+        pthread_mutex_unlock(&controle_rede_rcv);
+		retorno_trans = retorno_rede;
+        
+		//pthread_mutex_unlock(&mutex_retorno_rede_prod);
+        pthread_mutex_unlock(&controle_rede_env);
+		if(retorno_trans == 1) printf("Teste: Rede respondeu que nao sabe caminho\n");
     
     
-    strcpy(data_env.buffer,"");
-     fflush(stdout);
-    fpurge(stdin);
      
-    fgets(buffer_aux, 99, stdin);
-    buffer_aux[strlen(buffer_aux) - 1] = '\0';
-    //fgets(aux, 127, stdin);
-    //memcpy(data_env.buffer, aux, strlen(aux)+1);
-        
-        //strcpy(data_env.buffer,aux);
-        
-    pthread_mutex_lock(&trans_rede_env1);    
-        
-    buffer_rede_trans_env.tam_buffer = strlen(buffer_rede_trans_env.buffer)-1;
-        //printf("Tran:: tamanho buffer=%d",data_env.tam_buffer);
-    buffer_rede_trans_env.no_envio = no;
-        
-    memcpy(&buffer_rede_trans_env.buffer, &buffer_aux, sizeof (buffer_aux));
-    //Chama envia enlace;
-    
-        
-    pthread_mutex_unlock(&trans_rede_env2);
-    //pthread_mutex_unlock(&env1);
+   
     }
 }
 
@@ -107,21 +110,34 @@ void *prod_Transporte()
 void *cons_Transporte()
 {
     
+    struct datagrama aux;
+    
      while (1) {
 
-        //Trava mutex de sincronismo
-        pthread_mutex_lock(&trans_rede_rcv2);
-
+         
+        // pthread_mutex_lock(&mutex_rd_trns_cons);	
+         pthread_mutex_lock(&trans_rede_rcv1);//Fecha consumidor Rede->Transporte
+		aux.no_inicio = buffer_rede_trans_rcv.no_inicio;
+		aux.no_envio = buffer_rede_trans_rcv.no_envio;
+		aux.tam_buffer = buffer_rede_trans_rcv.tam_buffer;
+         
+		memcpy(aux.buffer, buffer_rede_trans_rcv.buffer, buffer_rede_trans_rcv.tam_buffer);
+        aux.buffer[buffer_rede_trans_rcv.tam_buffer]='\0';
+         
+		//pthread_mutex_unlock(&mutex_rd_trns_prod);
+        pthread_mutex_unlock(&trans_rede_env1);//Abre produtor Rede->Transporte
+		printf("\n\nTeste-> Tam_buffer: %d Bytes, Buffer: %s\n", aux.tam_buffer, aux.buffer);
+        
         
 
-        if (data_rcv.tam_buffer != 0) {
+        /*if (data_rcv.tam_buffer != 0) {
 
-        printf("\n\nTeste-> Tam_buffer: %d Bytes, Buffer: %s\n", data_rcv.tam_buffer, data_rcv.buffer);
+        
         data_rcv.tam_buffer = 0;
         data_rcv.no_envio = 0;
         pthread_mutex_unlock(&trans_rede_rcv1);
 
-       }
+       }*/
        
         
     }
