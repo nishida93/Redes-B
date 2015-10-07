@@ -71,7 +71,10 @@ void *prod_Transporte()
     int no=10;
     char *datagrama;
     
-    
+    /*fpurge(stdin);
+    fflush(stdin);
+    fpurge(stdout);
+    fflush(stdout);*/
     
     printf("Deseja enviar para qual nó?\n");
     scanf("%d", &aux.no_envio); 
@@ -80,25 +83,25 @@ void *prod_Transporte()
     scanf("%s",aux.buffer);
     
         aux.tam_buffer = strlen(aux.buffer);
-        //pthread_mutex_lock(&mutex_trns_rd_prod);	//Fecha produtor Transporte->Rede
-		pthread_mutex_lock(&trans_rede_env2);	//Fecha produtor Transporte->Rede
+       
+		pthread_mutex_lock(&trans_rede_env2);	
         
 		buffer_rede_trans_env.no_inicio = aux.no_inicio;
 		buffer_rede_trans_env.no_envio = aux.no_envio;
 		buffer_rede_trans_env.tam_buffer = aux.tam_buffer;
 		memcpy(buffer_rede_trans_env.buffer, aux.buffer, aux.tam_buffer);
-        
-		//pthread_mutex_unlock(&mutex_trns_rd_cons);
-        pthread_mutex_unlock(&trans_rede_rcv2);//Abre consumidor Transporte->Rede
-		//verificar retorno
-		//pthread_mutex_lock(&mutex_retorno_rede_cons);
-        pthread_mutex_unlock(&controle_rede_rcv);
+       
+        pthread_mutex_unlock(&trans_rede_rcv2);
+		
+        pthread_mutex_lock(&controle_rede_rcv);
 		retorno_trans = retorno_rede;
         
-		//pthread_mutex_unlock(&mutex_retorno_rede_prod);
+		
         pthread_mutex_unlock(&controle_rede_env);
-		if(retorno_trans == 1) printf("Teste: Rede respondeu que nao sabe caminho\n");
-    
+		if(retorno_trans == 1) {
+            
+            printf("erro!\n");
+        }
     
      
    
@@ -115,18 +118,18 @@ void *cons_Transporte()
      while (1) {
 
          
-        // pthread_mutex_lock(&mutex_rd_trns_cons);	
-         pthread_mutex_lock(&trans_rede_rcv1);//Fecha consumidor Rede->Transporte
+        
+        pthread_mutex_lock(&trans_rede_rcv1);
+         
 		aux.no_inicio = buffer_rede_trans_rcv.no_inicio;
 		aux.no_envio = buffer_rede_trans_rcv.no_envio;
-		aux.tam_buffer = buffer_rede_trans_rcv.tam_buffer;
+		aux.tam_buffer = buffer_rede_trans_env.tam_buffer;
          
-		memcpy(aux.buffer, buffer_rede_trans_rcv.buffer, buffer_rede_trans_rcv.tam_buffer);
-        aux.buffer[buffer_rede_trans_rcv.tam_buffer]='\0';
+		memcpy(aux.buffer, buffer_rede_trans_env.buffer, buffer_rede_trans_env.tam_buffer);
+        
+        pthread_mutex_unlock(&trans_rede_env1);
          
-		//pthread_mutex_unlock(&mutex_rd_trns_prod);
-        pthread_mutex_unlock(&trans_rede_env1);//Abre produtor Rede->Transporte
-		printf("\n\nTeste-> Tam_buffer: %d Bytes, Buffer: %s\n", aux.tam_buffer, aux.buffer);
+		printf("\n\nTeste-> Tam_buffer: %d Bytes, Buffer: %s  %s\n", aux.tam_buffer, buffer_rede_trans_env.buffer, aux.buffer);
         
         
 

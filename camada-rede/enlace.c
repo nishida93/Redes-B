@@ -186,13 +186,7 @@ void *recebe_Datagrama(void *thread)
     int i;
     char buf[1024];
     char aux[1024];
-   
-    while(1){
-        
-        
-        
     
-    printf("\nrecebe_Datagrama:");
     sock=socket(AF_INET, SOCK_DGRAM,0);
     
     if(sock < 0){
@@ -211,13 +205,22 @@ void *recebe_Datagrama(void *thread)
         error("binding recebe datagrama");
     }
     
+    fromlen = sizeof(struct sockaddr_in);
+   
+    while(1){
+        
+        
+        
+    
+   // printf("\nrecebe_Datagrama:");
+    
     
     
     
       
         //Mutex
         //pthread_mutex_lock(&rede_enlace_rcv1);
-        fromlen = sizeof(struct sockaddr_in);
+        
          
         //printf("\nSize:%d\n",sizeof(data_rcv));
         
@@ -229,15 +232,15 @@ void *recebe_Datagrama(void *thread)
         
         
         
-       
+       //printf("\n\nRecebeu\n");
         
         
         
         //RECALCULA CHECKSUM
         int checksum2 = data_rcv.checksum;
         
-        printf("\nTam Buffer:%d",data_rcv.tam_buffer);
-        /*printf("\nNo de Envio:%d",data_rcv.no_envio);
+        /*printf("\nTam Buffer:%d",data_rcv.tam_buffer);
+        printf("\nNo de Envio:%d",data_rcv.no_envio);
         printf("\nBuffer:%s",data_rcv.buffer);
         printf("\nChecksum:%d\n",data_rcv.checksum);
         printf("\nChecksum:%lu\n",sizeof(data_rcv));*/
@@ -249,24 +252,27 @@ void *recebe_Datagrama(void *thread)
         
         
         if (data_rcv.checksum == check){
-            printf("Datagrama sem erro\n\n");
+            //printf("Datagrama sem erro\n\n");
         }
         else {
-            printf("Datagrama com erro\n\n");
+            //printf("Datagrama com erro\n\n");
         
         }
         
         
         //printf("Buffer:::%s",data_rcv.buffer);
         
-   
+        /* printf("Tabela Recebida\n\n%d  %d %d %d %d %d ",data_rcv.dados.tabela_rotas[0].no_atual,data_rcv.dados.tabela_rotas[1].no_atual,data_rcv.dados.tabela_rotas[2].no_atual,data_rcv.dados.tabela_rotas[3].no_atual,data_rcv.dados.tabela_rotas[4].no_atual,data_rcv.dados.tabela_rotas[5].no_atual);  
+     printf("\n%d %d %d %d %d %d",data_rcv.dados.tabela_rotas[0].destino,data_rcv.dados.tabela_rotas[1].destino,data_rcv.dados.tabela_rotas[2].destino,data_rcv.dados.tabela_rotas[3].destino,data_rcv.dados.tabela_rotas[4].destino,data_rcv.dados.tabela_rotas[5].destino);
+     printf("\n%d %d %d %d %d %d\n",data_rcv.dados.tabela_rotas[0].custo,data_rcv.dados.tabela_rotas[1].custo,data_rcv.dados.tabela_rotas[2].custo,data_rcv.dados.tabela_rotas[3].custo,data_rcv.dados.tabela_rotas[4].custo,data_rcv.dados.tabela_rotas[5].custo);*/
         
         
-        //pthread_mutex_unlock(&rede_enlace_rcv2);
+       
     
-        //pthread_mutex_lock(&mutex_enlc_rd_prod);
+        
         pthread_mutex_lock(&rede_enlace_env2);
-        //Fecha produtor Enlace->Rede
+       // printf("\nReceive::Passou\n");
+       
 		buffer_rede_enlace_rcv.no_inicio = data_rcv.no_inicio;
 		buffer_rede_enlace_rcv.no_envio = data_rcv.no_envio;
 		buffer_rede_enlace_rcv.tam_buffer = data_rcv.tam_buffer;
@@ -276,14 +282,19 @@ void *recebe_Datagrama(void *thread)
 		buffer_rede_enlace_rcv.no_prox = data_rcv.no_prox;
 		buffer_rede_enlace_rcv.offset = data_rcv.offset;
 		buffer_rede_enlace_rcv.frag = data_rcv.frag;
+        
+        memcpy(&buffer_rede_enlace_rcv.buffer, &data_rcv.buffer, data_rcv.tam_buffer);
 		memcpy(&buffer_rede_enlace_rcv.dados, &data_rcv.dados, data_rcv.frag);
-		//pthread_mutex_unlock(&mutex_enlc_rd_cons);
-        pthread_mutex_lock(&rede_enlace_rcv2);//Abre consumidor Enlace->Rede
+		
+        pthread_mutex_unlock(&rede_enlace_rcv2);
+      
     }
 }
     
  
-   
+/////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
 
 
 //Envia Datagrama
@@ -304,33 +315,36 @@ void *envia_Datagrama(void *thread){
     while(1){
     
      
-     //pthread_mutex_lock(&rede_enlace_env2);//rede.c -->unlock
+     
         
-     //pthread_mutex_lock(&mutex_rd_enlc_cons);
-        pthread_mutex_lock(&rede_enlace_rcv1);//Fecha consumidor Rede->Enlace
-        printf("Entrei");
+     
+        pthread_mutex_lock(&rede_enlace_rcv1);
+       
         
 		data_env.no_inicio = buffer_rede_enlace_env.no_inicio;
 		data_env.no_envio = buffer_rede_enlace_env.no_envio;
 		data_env.tam_buffer = buffer_rede_enlace_env.tam_buffer;
 		data_env.id = buffer_rede_enlace_env.id;
 		data_env.controle = buffer_rede_enlace_env.controle;
-		data_env.no_vizinho = buffer_rede_enlace_env.no_envio;
+		data_env.no_vizinho = buffer_rede_enlace_env.no_vizinho;
 		data_env.no_prox = buffer_rede_enlace_env.no_prox;
 		data_env.offset = buffer_rede_enlace_env.offset;
 		data_env.frag = buffer_rede_enlace_env.frag;
-		memcpy(&data_rcv.dados, &buffer_rede_enlace_env.dados, buffer_rede_enlace_env.frag);
-		//pthread_mutex_unlock(&mutex_rd_enlc_prod);    
+        memcpy(&data_env.buffer, &buffer_rede_enlace_env.buffer, buffer_rede_enlace_env.tam_buffer);
+		memcpy(&data_env.dados, &buffer_rede_enlace_env.dados, buffer_rede_enlace_env.frag);
+		
+       // printf("ENLACE::BUFFER -- %s",data_env.buffer);
+        
         pthread_mutex_unlock(&rede_enlace_env1);    
             
-        printf("\npassei");
+       
         
         for(i=1; i <6; i++)
 		{
 			if(nos[i-1].no == data_env.no_prox) 
                 break;
-		} //j sairá com o indice do próximo nó    
-          printf(" \nI DO ENLACE::%d %d",i,data_env.no_prox);
+		} 
+          
         
     
     
@@ -341,15 +355,15 @@ void *envia_Datagrama(void *thread){
     sock = socket(AF_INET, SOCK_DGRAM,0);
     
     //if(data_env.tam_buffer != 0){    
-      printf(" \nI DO ENLACE22222::%d  %d %d",no_do_enlace, i,tem_ligacao(no_do_enlace,i));
+     
     if(tem_ligacao(no_do_enlace,i)){
-        printf(" \nI DO ENLACE22222::%d",tem_ligacao(no_do_enlace,i));
+       
      //fprintf(stdout,"\nEnlace Envia:::Enviando tabela de Rotas para o no:%d\n",nos_para_envio);
         
-     //   mtu = getMtu(no_do_enlace,nos_para_envio);
+     //mtu = getMtu(no_do_enlace,nos_para_envio);
         
         //printf("ENVIA::::IP:::::%s PORTA::::%d",nos[data_env.no_envio-1].ip,nos[data_env.no_envio-1].porta);
-        //printf("Mtu:::%d\n\n",mtu);
+     //printf("Mtu:::%d\n\n",mtu);
         
     if(sock < 0){
         error("socket");
@@ -374,7 +388,7 @@ void *envia_Datagrama(void *thread){
     //TESTA MTU
     
     if(strlen(data_env.buffer) > mtu){
-        error("MTU Error-> Nao foi possivel enviar o pacote");
+       //error("MTU Error-> Nao foi possivel enviar o pacote");
         
         
     }
@@ -390,11 +404,11 @@ void *envia_Datagrama(void *thread){
 
     //sprintf(check_aux,"%d",checksum);   
     
-    data_env.checksum = 10;
+    //data_env.checksum = 10;
     
 
     hp = gethostbyname(nos[data_env.no_envio-1].ip);  
-        //mtu = getMtu(no_do_enlace,data_env.no_envio);
+    mtu = getMtu(no_do_enlace,data_env.no_envio);
     
     if(hp == 0){
         error("Uknown host");
@@ -404,7 +418,7 @@ void *envia_Datagrama(void *thread){
      
     bcopy((char *)hp->h_addr, (char *)&server.sin_addr,hp->h_length);
     server.sin_port = htons(nos[data_env.no_envio-1].porta); //5000
-    printf("\nPorta%d",nos[data_env.no_envio-1].porta);
+   // printf("\nPorta%d",nos[data_env.no_envio-1].porta);
     length=sizeof(struct sockaddr_in);
     
     
@@ -412,19 +426,25 @@ void *envia_Datagrama(void *thread){
     
     //Garbler
         
-    /*printf("Tam Buffer:%d\n",data_env.tam_buffer);
+   /* printf("Tam Buffer:%d\n",data_env.tam_buffer);
     printf("No de Envio:%d\n",data_env.no_envio);
     printf("Buffer:%s\n",data_env.buffer);
     printf("Checksum:%d\n",data_env.checksum);
-    printf("sizeof:%lu\n",sizeof(data_env));*/
-           
+    printf("sizeof:%lu\n",sizeof(data_env));
+    
+        
+         printf("\n\n%d  %d %d %d %d %d ",data_env.dados.tabela_rotas[0].no_atual,data_env.dados.tabela_rotas[1].no_atual,data_env.dados.tabela_rotas[2].no_atual,data_env.dados.tabela_rotas[3].no_atual,data_env.dados.tabela_rotas[4].no_atual,data_env.dados.tabela_rotas[5].no_atual);  
+     printf("\n%d %d %d %d %d %d",data_env.dados.tabela_rotas[0].destino,data_env.dados.tabela_rotas[1].destino,data_env.dados.tabela_rotas[2].destino,data_env.dados.tabela_rotas[3].destino,data_env.dados.tabela_rotas[4].destino,data_env.dados.tabela_rotas[5].destino);
+     printf("\n%d %d %d %d %d %d\n",data_env.dados.tabela_rotas[0].custo,data_env.dados.tabela_rotas[1].custo,data_env.dados.tabela_rotas[2].custo,data_env.dados.tabela_rotas[3].custo,data_env.dados.tabela_rotas[4].custo,data_env.dados.tabela_rotas[5].custo);*/
+    
+    
            
     //sleep(5);
     set_garbler(0, 0, 0);
         
-       
+    //printf("\n\ndata_env:%d %s %d\n\n\n",data_env.no_vizinho,data_env.buffer,no_do_enlace);
     
-    printf("\nEnviandoEnviandoEnviandoEnviandoEnviandoEnviandoEnviandoEnviandoEnviandoEnviandoEnviandoEnviando\n");
+    
     n=sendto_garbled(sock,&data_env,sizeof(data_env),0,(struct sockaddr *)&server,length);
     
     if(n < 0 ){

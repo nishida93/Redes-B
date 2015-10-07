@@ -105,39 +105,38 @@ void *envia_Tabela(){
            
             i=0;  
           }
-			//se é vizinho
+			
 			if(tem_ligacao(no_inicio,i))
 			{
-                printf("i = %d",i);
+                
 				sleep(5);
-                printTabelaRotas();
-				//pthread_mutex_lock(&mutex_ramdom_id);
+                
                 pthread_mutex_lock(&controle_randomico);
 				id = random_id;
 				random_id = (random_id+1)%65535;
-				//pthread_mutex_unlock(&mutex_ramdom_id);
+				
                 pthread_mutex_unlock(&controle_randomico);
                 
-				//pthread_mutex_lock(&mutex_rd_enlc_prod);	//Fecha produtor Rede->Enlace
+				
                 pthread_mutex_lock(&rede_enlace_env1);
                 
-				pthread_mutex_lock(&controle_tabela);		//Fecha caminhos
+				pthread_mutex_lock(&controle_tabela);		
 				buffer_rede_enlace_env.no_inicio = no_inicio;
 				buffer_rede_enlace_env.no_envio = nos[i-1].no;
 				buffer_rede_enlace_env.tam_buffer = sizeof(tabela_rotas);
 				buffer_rede_enlace_env.id = id;
-				buffer_rede_enlace_env.controle = 0; //Código = 0 quando for divulgação
+				buffer_rede_enlace_env.controle = 0; 
 				buffer_rede_enlace_env.no_vizinho = no_inicio;
 				buffer_rede_enlace_env.no_prox = nos[i-1].no;
 				buffer_rede_enlace_env.offset = 0;
 				buffer_rede_enlace_env.frag = sizeof(tabela_rotas);
                 
 				memcpy(&buffer_rede_enlace_env.dados, tabela_rotas, sizeof(tabela_rotas));
-                printf("Testando : %d %d",i,buffer_rede_enlace_env.no_prox);
-				pthread_mutex_unlock(&controle_tabela);		//Abre caminhos
-				//pthread_mutex_unlock(&mutex_rd_enlc_cons);	//Abre consumidor Rede->Enlace
+               
+				pthread_mutex_unlock(&controle_tabela);		
+				
                 pthread_mutex_unlock(&rede_enlace_rcv1);
-                printf("\nDesbloquei");
+               
 			}	
 		
 	}
@@ -152,7 +151,7 @@ void *envia_DatagramaRede()
 {    
     
     
-    struct datagrama aux; //Vai pegar os valores da estrutura Transporte->Rede
+    struct datagrama aux; 
 	int offset;
     int frag;
 	int id;
@@ -162,43 +161,42 @@ void *envia_DatagramaRede()
     
 	while(1)
 	{
-		//pthread_mutex_lock(&mutex_trns_rd_cons);	//Fecha consumidor Transporte->Rede
+		
         pthread_mutex_lock(&trans_rede_rcv2);
         
 		aux.no_inicio = buffer_rede_trans_rcv.no_inicio;
-        printf("aux_no_envio: %d",buffer_rede_trans_rcv.no_inicio);
+       
 		aux.no_envio = buffer_rede_trans_env.no_envio;
 		aux.tam_buffer = buffer_rede_trans_env.tam_buffer;
-		memcpy(aux.buffer, buffer_rede_trans_env.buffer, buffer_rede_trans_rcv.tam_buffer);
-		//pthread_mutex_unlock(&mutex_trns_rd_prod);	//Abre produtor Transporte->Rede
-        pthread_mutex_lock(&trans_rede_env2);
+		memcpy(aux.buffer, buffer_rede_trans_env.buffer, buffer_rede_trans_env.tam_buffer);
+		
+        pthread_mutex_unlock(&trans_rede_env2);
         
-        printf("aux_no_envio: %d",aux.no_envio);
+        printf("\n\naux_no_envio: %d %s",aux.no_envio, aux.buffer);
         for(j=0; j<6; j++)
 		{
 			if(tabela_rotas[j].no_atual == aux.no_envio) break;
-		} //j sairá com o indice do próximo nó
+		} 
         
-        //verificar se sabe o caminho
+        
 		prox_no = tabela_rotas[j].destino;
 
 		if(prox_no == -1)
 		{
-			//pthread_mutex_lock(&mutex_retorno_rede_prod);
+			
             pthread_mutex_lock(&controle_rede_env);
 			retorno_rede = 1;
-			//pthread_mutex_unlock(&mutex_retorno_rede_cons);
+			
             pthread_mutex_unlock(&controle_rede_rcv);
 			continue;
 		}
         
-        //retorno da camada de transporte
-        //So vai devolver o retorno se for pacote enviado da camada de transporte
+        
         if (aux.no_inicio == no_inicio){
-            //pthread_mutex_lock(&mutex_retorno_rede_prod);
+            
             pthread_mutex_lock(&controle_rede_env);
             retorno_rede = 0;
-            //pthread_mutex_unlock(&mutex_retorno_rede_cons);
+            
             pthread_mutex_unlock(&controle_rede_rcv);
         }
 
@@ -206,15 +204,14 @@ void *envia_DatagramaRede()
 		offset = 0;
 		frag = aux.tam_buffer;
 
-		//Gerar id
+		
 		pthread_mutex_lock(&controle_randomico);
 		id = random_id;
 		random_id = (random_id+1)%65535;
 		pthread_mutex_unlock(&controle_randomico);
 
 		do{
-			//colocar no buffer
-			//pthread_mutex_lock(&mutex_rd_enlc_prod);
+			
             pthread_mutex_lock(&rede_enlace_env1);
             
 			buffer_rede_enlace_env.no_inicio = aux.no_inicio;
@@ -226,16 +223,16 @@ void *envia_DatagramaRede()
 			buffer_rede_enlace_env.no_vizinho = aux.no_inicio;
 			buffer_rede_enlace_env.no_prox = prox_no;
 			buffer_rede_enlace_env.frag = frag;
+            memcpy(&buffer_rede_enlace_env.buffer, aux.buffer, aux.tam_buffer);
 			memcpy(&buffer_rede_enlace_env.dados, aux.buffer+offset, frag);
             
-			//pthread_mutex_unlock(&mutex_rd_enlc_cons);
-            pthread_mutex_lock(&rede_enlace_rcv1);
-			//verificar o retorno da enlace
-			//pthread_mutex_lock(&mutex_retorno_enlace_cons);
+			
+            pthread_mutex_unlock(&rede_enlace_rcv1);
+			
             pthread_mutex_lock(&controle_rede_enlace_rcv);
 			retorno = retorno_enlace;
-			//pthread_mutex_unlock(&mutex_retorno_enlace_prod);
-            pthread_mutex_lock(&controle_rede_enlace_env);
+			
+            pthread_mutex_unlock(&controle_rede_enlace_env);
             
             printf("\n\nTamanho do pacote %lu \n\n",(sizeof(buffer_rede_enlace_env)-100+buffer_rede_enlace_env.frag));
             
@@ -257,13 +254,12 @@ void *recebe_DatagramaRede()
 {
     
     struct datagrama aux;
-	struct tabela_de_rotas* pont_caminhos;
+	struct tabela_de_rotas* table;
 	int i;
 
 	while(1)
 	{
-		//receber da enlace
-		//pthread_mutex_lock(&mutex_enlc_rd_cons);	//Fecha consumidor Enlace->Rede
+		
         pthread_mutex_lock(&rede_enlace_rcv2);
         
         
@@ -277,63 +273,71 @@ void *recebe_DatagramaRede()
 		aux.offset = buffer_rede_enlace_rcv.offset;
 		aux.frag = buffer_rede_enlace_rcv.frag;
 		memcpy(&aux.dados, &buffer_rede_enlace_rcv.dados, buffer_rede_enlace_env.frag);
-        
-		//pthread_mutex_unlock(&mutex_enlc_rd_prod);	//Abre produtor Enlace->Rede
+        memcpy(&aux.buffer, &buffer_rede_enlace_rcv.buffer, buffer_rede_enlace_rcv.tam_buffer);
+        printf("BUFFER:%s\n",aux.buffer);
+		
         pthread_mutex_unlock(&rede_enlace_env2);
-		//ver se é pra mim
-		if(aux.no_envio == no_inicio) //se é pra mim
+		
+		if(aux.no_envio == no_inicio) 
 		{
 
-				if(aux.controle == 0) //se é divulgação atualiza
+				if(aux.controle == 0) 
 				{
-					pont_caminhos = (struct tabela_de_rotas*)&aux.dados;
-					pthread_mutex_lock(&controle_tabela);		//Fecha caminhos
+					table = (struct tabela_de_rotas*)&aux.dados;
+					pthread_mutex_lock(&controle_tabela);		
 					for(i=0; i<6; i++)
 					{
-						if(pont_caminhos->destino != -1) //se vizinho sabe chegar
+						if(table->destino != -1) 
 						{
-							if(tabela_rotas[i].destino == -1) //se eu não sei chegar
+							if(tabela_rotas[i].destino == -1) 
 							{
-								//novo caminho
-								tabela_rotas[i].destino = aux.no_vizinho; //esse é o vizinho que enviou (eu estou recebendo)
-								tabela_rotas[i].custo = pont_caminhos->custo+1;
+								
+								tabela_rotas[i].destino = aux.no_vizinho; 
+								tabela_rotas[i].custo = table->custo+1;
 							}
-							else if(pont_caminhos->custo+1 < tabela_rotas[i].custo) //se eu chego com caminho mais pesado
+							else if(table->custo+1 < tabela_rotas[i].custo)
                             {
-									//novo caminho
-									tabela_rotas[i].destino = aux.no_vizinho; //esse é o vizinho que enviou (eu estou recebendo)
-									tabela_rotas[i].custo = pont_caminhos->custo+1;
+									
+									tabela_rotas[i].destino = aux.no_vizinho; 
+									tabela_rotas[i].custo = table->custo+1;
                             }
-								//senão mantenho o caminho que conheço
+								
 						}
-						pont_caminhos++;
+                        
+						table++;
+                        
 					}
-					pthread_mutex_unlock(&controle_tabela);		//Abre caminhos
+                    
+                    
+					pthread_mutex_unlock(&controle_tabela);		
 				}
-				else //senão são dados
+				else 
 				{
-                  //  pthread_mutex_lock(&mutex_rd_trns_prod);
+                  
+                    
                     pthread_mutex_lock(&trans_rede_env1);
                     
                     
                     buffer_rede_trans_env.no_inicio = aux.no_inicio;
                     buffer_rede_trans_env.no_envio = aux.no_envio;
                     buffer_rede_trans_env.tam_buffer = aux.tam_buffer;
-                    memcpy(&buffer_rede_trans_env.buffer,&aux.dados, buffer_rede_trans_env.tam_buffer);
-                    //pthread_mutex_unlock(&mutex_rd_trns_cons);
-                    pthread_mutex_lock(&trans_rede_rcv1);
+                    
+                    memcpy(&buffer_rede_trans_env.buffer,&aux.buffer, buffer_rede_trans_env.tam_buffer);
+                    memcpy(&buffer_rede_trans_env.dados,&aux.dados, buffer_rede_enlace_rcv.frag);
+                    
+                    pthread_mutex_unlock(&trans_rede_rcv1);
 				}
 		}
-		else //senão repassa (pode ter refragmentação aqui)
+		else 
 		{      
-            //pthread_mutex_lock(&mutex_trns_rd_prod);
+           
             pthread_mutex_lock(&trans_rede_env2);
             buffer_rede_trans_rcv.no_inicio = aux.no_inicio;
             buffer_rede_trans_rcv.no_envio = aux.no_envio;
             buffer_rede_trans_rcv.tam_buffer = aux.tam_buffer;
 
             memcpy(buffer_rede_trans_rcv.buffer,&aux.dados,aux.frag);
-            //pthread_mutex_unlock(&mutex_trns_rd_cons);
+            
             pthread_mutex_lock(&trans_rede_rcv2);
 		}
 	}
@@ -375,30 +379,6 @@ void *recebe_Tabela(){
 }
 
 void atualizaTabela(){
-    
-   /* int i;
-
-    /* Salva quem enviou para não enviar para esse nó*/
-    /*tabela_rotas[1].quem_enviou = datagram.num_no;
-
-    printf("Recebi tabela de rotas do nó '%d'\n", tabela_rotas[1].quem_enviou);
-
-    for (i = 0; i < 6; i++) {
-
-        /* Se nó destino -1 */
-        /*if (tabela_rotas[i].destino == -1 && datagram.data.tabela_rotas[i].destino != -1)
-        {
-            tabela_rotas[i].destino = datagram.data.tabela_rotas[i].destino;
-            tabela_rotas[i].custo = datagram.data.tabela_rotas[i].custo + 1;
-            tabela_rotas[i].saida = datagram.num_no;
-        }
-
-        /* atualiza custos */
-        /*if (tabela_rotas[i].custo + 1 > datagram.data.tabela_rotas[i].custo) {
-            tabela_rotas[i].custo = datagram.data.tabela_rotas[i].custo + 1;
-            tabela_rotas[i].saida = datagram.num_no;
-        }
-    }*/
     
 }
 
